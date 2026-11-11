@@ -1,0 +1,23 @@
+# Private configuration
+config.php
+*.key
+
+# Dependencies
+vendor/
+
+# Logs
+*.Log
+error_log
+
+# Upload files
+uploads/*
+!uploads/.htaccess
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.temp
+*.back
