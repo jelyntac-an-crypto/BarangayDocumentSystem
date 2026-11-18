@@ -4,6 +4,9 @@ declare(strict_types=1);
 // Load private configuration first.
 require_once __DIR__ . '/bootstrap.php';
 
+// Set the application timezone to Philippine time.
+date_default_timezone_set('Asia/Manila');
+
 // Apply security headers before page output.
 require_once __DIR__ . '/header.php';
 

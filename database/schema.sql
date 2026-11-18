@@ -1,4 +1,3 @@
-
 USE barangay_document_system;
 
 -- 1. COMMON USER ACCOUNTS

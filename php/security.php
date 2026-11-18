@@ -125,3 +125,115 @@ function isValidCustomNameExtension(string $extension): bool
 {
     return in_array($extension, ['I', 'II', 'III', 'IV', 'IX', 'X'], true);
 }
+
+// Record security activity using one consistent database format.
+function recordActivity(
+    PDO $pdo,
+    ?string $userId,
+    string $eventType,
+    string $description,
+    string $ipAddress,
+    string $userAgent = '',
+    array $eventData = [],
+    ?string $usernameTyped = null
+): void {
+    $stmt = $pdo->prepare(
+        'INSERT INTO activity_logs
+            (user_id, username_typed, event_type, description,
+             ip_address, user_agent, event_data)
+         VALUES (?, ?, ?, ?, ?, ?, ?)'
+    );
+
+    $stmt->execute([
+        $userId,
+        $usernameTyped === null ? null : substr($usernameTyped, 0, 255),
+        $eventType,
+        substr($description, 0, 500),
+        $ipAddress,
+        substr($userAgent, 0, 500),
+        $eventData === []
+            ? null
+            : json_encode($eventData, JSON_THROW_ON_ERROR)
+    ]);
+}
+
+
+// Check whether an IP address currently has an active block.
+function isIpTemporarilyBlocked(PDO $pdo, string $ipAddress): bool
+{
+    $stmt = $pdo->prepare(
+        'SELECT id
+         FROM ip_blocks
+         WHERE ip_address = ?
+           AND expires_at > NOW()
+         LIMIT 1'
+    );
+
+    $stmt->execute([$ipAddress]);
+
+    return $stmt->fetchColumn() !== false;
+}
+
+// Block an IP after 16 failed authentication attempts within 10 minutes.
+function applyIpFailureBlock(
+    PDO $pdo,
+    string $ipAddress,
+    ?string $userId = null,
+    string $userAgent = ''
+): bool {
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*)
+         FROM login_attempts
+         WHERE ip_address = ?
+           AND attempt_status IN ('FAILED', 'CAPTCHA_FAILED', 'OTP_FAILED')
+           AND attempted_at >= NOW() - INTERVAL 10 MINUTE"
+    );
+
+    $stmt->execute([$ipAddress]);
+    $failedCount = (int) $stmt->fetchColumn();
+
+    if ($failedCount < 16) {
+        return false;
+    }
+
+    // Do not repeatedly extend an existing active block.
+    if (isIpTemporarilyBlocked($pdo, $ipAddress)) {
+        return true;
+    }
+
+    // Create a 10-minute IP block.
+    $stmt = $pdo->prepare(
+        "INSERT INTO ip_blocks
+            (ip_address, reason, blocked_at, expires_at)
+         VALUES (
+            ?,
+            '16 failed authentication attempts within 10 minutes',
+            NOW(),
+            DATE_ADD(NOW(), INTERVAL 10 MINUTE)
+         )
+         ON DUPLICATE KEY UPDATE
+            reason = VALUES(reason),
+            blocked_at = NOW(),
+            expires_at = DATE_ADD(NOW(), INTERVAL 10 MINUTE)"
+    );
+
+    $stmt->execute([$ipAddress]);
+
+    // Record the IP-blocking event using the centralized helper.
+    recordActivity(
+       $pdo,
+       $userId,
+       'IP_BLOCKED',
+       'IP address blocked after 16 failed authentication attempts within 10 minutes.',
+       $ipAddress,
+       $userAgent,
+       [
+        'failed_attempts' => $failedCount,
+        'window_minutes' => 10,
+        'block_minutes' => 10
+       ]
+    );
+
+    return true;
+}
+

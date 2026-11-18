@@ -1,5 +1,6 @@
-
+﻿
 document.addEventListener('DOMContentLoaded', function () {
+console.log('REGISTER JS: DOMContentLoaded started');
 
     const idNumberInput = document.getElementById('id_number');
     const idNumberFeedback = document.getElementById('id-number-feedback');
@@ -880,6 +881,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     registerForm.addEventListener('submit', function (event) {
+        // Validate CAPTCHA before running the other registration checks.
+        const captchaInput = document.getElementById('captcha_answer');
+        const captchaError = document.getElementById('captcha-error');
+
+        if (captchaInput && captchaError && captchaInput.value.trim() === '') {
+            event.preventDefault();
+            captchaError.textContent = 'Please enter the CAPTCHA code.';
+            captchaInput.focus();
+            return;
+        }
+
+        if (captchaError) {
+            captchaError.textContent = '';
+        }
         checkPasswordStrength();
 
         birthDateInput.dataset.touched = 'true';
@@ -1229,4 +1244,41 @@ document.addEventListener('DOMContentLoaded', function () {
         checkPrivacyConsent();
     });
 
+    // Validate CAPTCHA when the user types or leaves the field.
+    const captchaInput = document.getElementById('captcha_answer');
+    const captchaError = document.getElementById('captcha-error');
+
+    function checkCaptchaField() {
+        if (captchaInput.value.trim() === '') {
+            captchaError.textContent =
+                captchaInput.dataset.touched === 'true'
+                    ? 'CAPTCHA is required.'
+                    : '';
+            return false;
+        }
+
+        captchaError.textContent = '';
+        return true;
+    }
+
+    captchaInput.addEventListener('input', function () {
+        captchaInput.dataset.touched = 'true';
+        checkCaptchaField();
+    });
+
+    captchaInput.addEventListener('blur', function () {
+        captchaInput.dataset.touched = 'true';
+        checkCaptchaField();
+    });
+    // Refresh CAPTCHA image and generate a new challenge.
+    const captchaImage = document.getElementById('captcha-image');
+    const refreshCaptchaButton = document.getElementById('refresh-captcha');
+
+    if (captchaImage && refreshCaptchaButton) {
+        refreshCaptchaButton.addEventListener('click', function () {
+            captchaImage.src = 'captcha.php?refresh=' + Date.now();
+        });
+    }
+
 });
+

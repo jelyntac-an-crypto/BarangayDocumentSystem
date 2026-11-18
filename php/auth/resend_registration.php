@@ -4,6 +4,10 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/init.php';
 require_once dirname(__DIR__) . '/mailer.php';
 
+// Capture request details for security logging.
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
+
 // Only allow POST requests.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -25,6 +29,15 @@ if (
 $csrfToken = $_POST['csrf_token'] ?? null;
 
 if (!is_string($csrfToken) || !verifyCsrfToken($csrfToken)) {
+    recordActivity(
+        $pdo,
+        $userId,
+        'CSRF_REJECTED',
+        'Invalid CSRF token during registration OTP resend.',
+        $ipAddress,
+        $userAgent
+    );
+
     http_response_code(403);
     exit('Invalid request.');
 }
@@ -138,23 +151,15 @@ try {
 
     $newOtpId = (int) $pdo->lastInsertId();
 
-    // Record the resend request for rate limiting.
-    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
-    $logStmt = $pdo->prepare(
-        'INSERT INTO activity_logs
-            (user_id, event_type, description, ip_address, user_agent)
-        VALUES (?, ?, ?, ?, ?)'
-    );
-
-    $logStmt->execute([
-        $userId,
-        'OTP_RESEND_REQUESTED',
-        'Resident requested a new registration OTP.',
-        $ipAddress,
-        $userAgent
-    ]);
+// Record the resend request for rate limiting.
+recordActivity(
+    $pdo,
+    $userId,
+    'OTP_RESEND_REQUESTED',
+    'Resident requested a new registration OTP.',
+    $ipAddress,
+    $userAgent
+);
 
     $pdo->commit();
 
@@ -184,6 +189,16 @@ try {
             . "If you did not request this code, ignore this email and consider changing your password.";
 
         $mail->send();
+
+        // Record successful registration OTP email delivery.
+        recordActivity(
+            $pdo,
+            $userId,
+            'OTP_SENT',
+            'Registration verification OTP resend email sent.',
+            $ipAddress,
+            $userAgent
+        );
 
     } catch (Throwable $mailError) {
         // Invalidate the code if email delivery fails.

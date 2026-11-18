@@ -12,3 +12,8 @@ header('Referrer-Policy: strict-origin-when-cross-origin');
 
 // Disable unnecessary browser features.
 header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+
+// Prevent browsers from caching protected pages.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');

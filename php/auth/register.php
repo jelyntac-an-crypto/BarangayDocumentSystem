@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/init.php';
+require_once dirname(__DIR__) . '/layout.php';
 
 // Generate a CSRF token for form protection.
 $csrfToken = generateCsrfToken();
@@ -30,23 +31,16 @@ function oldValue(array $oldInput, string $field): string
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resident Registration</title>
 
+    <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/auth/register.css">
 </head>
 
-<body>
+<body class="register-page">
 
-    <p class="system-name">
-        Barangay Document Request and Tracking System
-    </p>
+    <?php renderSiteHeader('register', '../../'); ?>
 
-    <header>
-        <nav>
-            <a href="../../index.php">Home</a> |
-            <a href="login.php">Log-in</a>
-        </nav>
-    </header>
-
-    <h1>Resident Registration</h1>
+    <main class="register-container">
+        <h1>Resident Registration</h1>
 
     <form method="POST" action="register_process.php">
 
@@ -512,6 +506,38 @@ function oldValue(array $oldInput, string $field): string
             <p class="field-error"><?= e($errors['privacy_consent']) ?></p>
         <?php endif; ?>
 
+        <!-- CAPTCHA verification -->
+        <h2>Human Verification</h2>
+
+        <p>Please enter the six characters shown in the image.</p>
+
+        <div class="captcha-container">
+            <img
+                src="captcha.php"
+                id="captcha-image"
+                alt="CAPTCHA verification image"
+                width="190"
+                height="65"
+            >
+
+            <button type="button" id="refresh-captcha">
+                Refresh CAPTCHA
+            </button>
+        </div>
+
+        <label for="captcha_answer">Enter CAPTCHA <span class="required">*</span></label>
+        <input
+            type="text"
+            name="captcha_answer"
+            id="captcha_answer"
+            minlength="6"
+            maxlength="6"
+            autocomplete="off"
+            required
+        >
+
+        <p id="captcha-error" class="field-error" aria-live="polite"><?= isset($errors['captcha']) ? e($errors['captcha']) : '' ?></p>
+
         <!-- Honeypot field: real users should leave this empty. -->
         <div hidden aria-hidden="true">
             <label>Leave this field empty</label>
@@ -521,12 +547,13 @@ function oldValue(array $oldInput, string $field): string
         <button type="submit">Register</button>
 
     </form>
+    </main>
 
-    <footer>
-        <p>&copy; 2026 Barangay Document Request and Tracking System. All rights reserved.</p>
-    </footer>
+    <?php renderSiteFooter(); ?>
 
     <script src="../../js/auth/register.js" defer></script>
 
 </body>
 </html>
+
+

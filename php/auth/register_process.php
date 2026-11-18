@@ -57,6 +57,11 @@ function returnRegistrationErrors(array $errors): never
     exit;
 }
 
+// Capture request details for security logging.
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
+$submittedUsername = getPostString('username');
+
 // Only allow POST requests.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -67,6 +72,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $csrfToken = $_POST['csrf_token'] ?? null;
 
 if (!is_string($csrfToken) || !verifyCsrfToken($csrfToken)) {
+    recordActivity(
+        $pdo,
+        null,
+        'CSRF_REJECTED',
+        'Invalid CSRF token during resident registration.',
+        $ipAddress,
+        $userAgent,
+        [],
+        $submittedUsername
+    );
+
     http_response_code(403);
     exit('Invalid request.');
 }
@@ -77,6 +93,60 @@ $honeypot = $_POST['website'] ?? '';
 if (!is_string($honeypot) || $honeypot !=='') {
     http_response_code(400);
     exit;
+}
+
+// Verify the registration CAPTCHA on the server.
+$storedCaptchaHash = $_SESSION['captcha_answer_hash_registration'] ?? null;
+
+// Consume only the registration CAPTCHA challenge.
+unset($_SESSION['captcha_answer_hash_registration']);
+
+$captchaAnswer = strtoupper(getPostString('captcha_answer'));
+
+// Check whether the CAPTCHA challenge is missing or expired.
+if (!is_string($storedCaptchaHash) || $storedCaptchaHash === '') {
+    recordActivity(
+        $pdo,
+        null,
+        'CAPTCHA_FAILED',
+        'Registration CAPTCHA challenge was missing or expired.',
+        $ipAddress,
+        $userAgent,
+        ['reason' => 'missing_or_expired'],
+        $submittedUsername
+    );
+
+    returnRegistrationErrors([
+        'captcha' => 'CAPTCHA expired. Please refresh the image.'
+    ]);
+}
+
+// Check whether the CAPTCHA field is empty.
+if ($captchaAnswer === '') {
+    returnRegistrationErrors([
+        'captcha' => 'Please enter the CAPTCHA code.'
+    ]);
+}
+
+// Check whether the submitted CAPTCHA is correct.
+if (
+    preg_match('/^[A-Z0-9]{6}$/', $captchaAnswer) !== 1 ||
+    !password_verify($captchaAnswer, $storedCaptchaHash)
+) {
+    recordActivity(
+        $pdo,
+        null,
+        'CAPTCHA_FAILED',
+        'Incorrect registration CAPTCHA entered.',
+        $ipAddress,
+        $userAgent,
+        ['reason' => 'incorrect'],
+        $submittedUsername
+    );
+
+    returnRegistrationErrors([
+        'captcha' => 'Incorrect CAPTCHA code. Please try again.'
+    ]);
 }
 
 // Collect submitted registration fields.
@@ -531,26 +601,18 @@ try {
     ]);
 
     // Record the registration activity.
-    $stmt = $pdo->prepare(
-        'INSERT INTO activity_logs
-            (user_id, event_type, description, ip_address,
-             user_agent, event_data)
-         VALUES (?, ?, ?, ?, ?, ?)'
-    );
-
-    $eventData = json_encode([
-        'role' => 'resident',
-        'account_status' => 'pending'
-    ], JSON_THROW_ON_ERROR);
-
-    $stmt->execute([
+    recordActivity(
+        $pdo,
         $userID,
-        'REGISTRATION_CREATED',
+        'REGISTERED',
         'Resident registration submitted.',
         $ipAddress,
         $userAgent,
-        $eventData
-    ]);
+        [
+            'role' => 'resident',
+            'account_status' => 'pending'
+        ]
+    );
 
     // Save all database records together.
     $pdo->commit();
@@ -597,6 +659,17 @@ try {
         . "If you did not request this code, ignore this email and consider changing your password.";
 
     $mail->send();
+    // Record successful registration OTP email delivery.
+    recordActivity(
+        $pdo,
+        $userID,
+        'OTP_SENT',
+        'Registration verification OTP email sent.',
+        $ipAddress,
+        $userAgent,
+        [],
+        $username
+    );
 } catch (Throwable $e) {
     error_log('Registration OTP email failed: ' . $e->getMessage());
     http_response_code(500);

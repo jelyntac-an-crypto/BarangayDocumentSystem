@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/init.php';
+require_once dirname(__DIR__) . '/layout.php';
 
 // Allow only GET and POST requests.
 if (!in_array($_SERVER['REQUEST_METHOD'], ['GET','POST'], true)) {
@@ -23,6 +24,9 @@ if (
 $message = $_SESSION['registration_otp_message'] ?? '';
 unset($_SESSION['registration_otp_message']);
 
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
+
 // Process OTP submission.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -30,6 +34,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $csrfToken = $_POST['csrf_token'] ?? null;
 
     if (!is_string($csrfToken) || !verifyCsrfToken($csrfToken)) {
+        recordActivity(
+            $pdo,
+            $userId,
+            'CSRF_REJECTED',
+            'Invalid CSRF token during registration OTP verification.',
+            $ipAddress,
+            $userAgent
+        );
+ 
         http_response_code(403);
         exit('Invalid request.');
     }
@@ -46,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Lock the pending account
             $stmt = $pdo->prepare(
-                'SELECT id_number, account_status
+                'SELECT id_number, username, account_status
                 FROM users
                 WHERE id_number = ?
                 FOR UPDATE'
@@ -91,22 +104,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$otpRecord['id']]);
 
                 // Record the expired OTP event.
-                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-                $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
-                $logStmt = $pdo->prepare(
-                    'INSERT INTO activity_logs
-                       (user_id, event_type, description, ip_address, user_agent)
-                     VALUES (?, ?, ?, ?, ?)'
-                );
-
-                $logStmt->execute([
+                recordActivity(
+                    $pdo,
                     $userId,
-                    'OTP_EXPIRED',
-                    'Registration OTP expired.',
+                    'OTP_FAILED',
+                    'Expired registration OTP entered.',
                     $ipAddress,
-                    $userAgent
-                ]);
+                    $userAgent,
+                    ['reason' => 'expired'],
+                    (string) $user['username']
+                );
 
                 $pdo->commit();
 
@@ -128,23 +135,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $otpRecord['id']
                 ]);
 
-                //Record the failed OTP verification attempt.
-                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-                $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
-                $logStmt = $pdo->prepare(
-                    'INSERT INTO activity_logs
-                        (user_id, event_type, description, ip_address, user_agent)
-                    VALUES (?, ?, ?, ?, ?)'
-                );
-
-                $logStmt->execute([
+                // Record the failed OTP verification attempt.
+                recordActivity(
+                    $pdo,
                     $userId,
                     'OTP_FAILED',
                     'Incorrect registration OTP entered.',
                     $ipAddress,
-                    $userAgent
-                ]);
+                    $userAgent,
+                    ['attempts' => $newAttempts],
+                    (string) $user['username']
+                );
 
                 $pdo->commit();
 
@@ -176,22 +177,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute(['active', $userId]);
 
                 // Record successful email verification.
-                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-                $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
-                $stmt = $pdo->prepare(
-                    'INSERT INTO activity_logs
-                        (user_id, event_type, description, ip_address, user_agent)
-                     VALUES (?, ?, ?, ?, ?)'
-                );
-
-                $stmt->execute([
+               recordActivity(
+                    $pdo,
                     $userId,
-                    'EMAIL_VERIFIED',
+                    'ACCOUNT_VERIFIED',
                     'Resident email successfully verified.',
                     $ipAddress,
-                    $userAgent
-                ]);
+                    $userAgent,
+                    [],
+                    (string) $user['username']
+                );
 
                 $pdo->commit();
 
@@ -227,10 +222,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/auth/verify_registration.css">
     <title>Verify Registration</title>
 </head>
 <body>
+
+    <?php renderSiteHeader('default', '../../'); ?>
     <div class="verification-container">
         <h2>Email Verification</h2>
     </div>
@@ -282,6 +280,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div>
     <script src="../../js/auth/verify_registration.js" defer></script>
 </div>
+
+    <?php renderSiteFooter(); ?>
 
 </body>
 </html>

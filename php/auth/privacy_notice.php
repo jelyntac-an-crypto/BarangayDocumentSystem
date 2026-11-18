@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/init.php';
+require_once dirname(__DIR__) . '/layout.php';
 ?>
 
 <!DOCTYPE html>
@@ -11,9 +12,12 @@ require_once dirname(__DIR__) . '/init.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Notice | Barangay Document Request and Tracking System</title>
 
+    <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/auth/privacy_notice.css">
 </head>
-<body>
+<body class="privacy-page">
+
+    <?php renderSiteHeader('default', '../../'); ?>
     <main class="privacy-container">
         <article class="privacy-content">
 
@@ -253,5 +257,7 @@ require_once dirname(__DIR__) . '/init.php';
 
         </article>
     </main>
+    <?php renderSiteFooter(); ?>
+
 </body>
 </html>

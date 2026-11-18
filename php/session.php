@@ -6,14 +6,14 @@ if (session_status() !== PHP_SESSION_NONE) {
     throw new RuntimeException('Session already started.');
 }
 
-// Configure secure session cookies
+// Configure secure session cookies.
 ini_set('session.use_strict_mode', '1');
 ini_set('session.use_only_cookies', '1');
 ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_secure', '0');
 ini_set('session.cookie_samesite', 'Strict');
 
-// Set the five-minute idle timeout.
+// Five-minute idle timeout for authenticated users only.
 const SESSION_IDLE_TIMEOUT = 300;
 
 // Configure cookie parameters before starting the session.
@@ -27,32 +27,41 @@ session_set_cookie_params([
 
 session_start();
 
-// Check session inactivity.
-$now = time();
-$lastActivity = $_SESSION['last_activity'] ?? $now;
+// Apply idle timeout only to authenticated sessions.
+if (isset($_SESSION['user_id'])) {
 
-if (($now - $lastActivity) > SESSION_IDLE_TIMEOUT) {
-    $_SESSION = [];
+    $now = time();
+    $lastActivity = $_SESSION['last_activity'] ?? $now;
 
-    if (ini_get('session.use_cookies')) {
-        $params = session_get_cookie_params();
+    if (
+        !is_int($lastActivity) ||
+        ($now - $lastActivity) > SESSION_IDLE_TIMEOUT
+    ) {
+        // Clear expired authenticated session.
+        $_SESSION = [];
 
-        setcookie(
-            session_name(),
-            '',
-            [
-                'expires' => time() - 42000,
-                'path' => $params['path'],
-                'domain' => $params['domain'],
-                'secure' => $params['secure'],
-                'httponly' => $params['httponly'],
-                'samesite' => $params['samesite']
-            ]
-        );
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+
+            setcookie(
+                session_name(),
+                '',
+                [
+                    'expires' => time() - 42000,
+                    'path' => $params['path'],
+                    'domain' => $params['domain'],
+                    'secure' => $params['secure'],
+                    'httponly' => $params['httponly'],
+                    'samesite' => $params['samesite']
+                ]
+            );
+        }
+
+        session_destroy();
+        session_start();
+        session_regenerate_id(true);
+    } else {
+        // Update activity for authenticated users.
+        $_SESSION['last_activity'] = $now;
     }
-
-    session_destroy();
-    session_start();
 }
-
-$_SESSION['last_activity'] = time();
