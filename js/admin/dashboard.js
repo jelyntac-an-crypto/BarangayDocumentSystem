@@ -1,4 +1,4 @@
-﻿"use strict";
+"use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
     const endpoint = "dashboard_data.php";
@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 datasets: [{
                     label: "Failed log-ins",
                     data: values,
-                    backgroundColor: "#3b82f6",
-                    borderColor: "#2563eb",
+                    backgroundColor: "#c9a27a",
+                    borderColor: "#9a6236",
                     borderWidth: 1,
                     borderRadius: 5
                 }]

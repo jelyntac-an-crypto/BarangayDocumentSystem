@@ -538,15 +538,20 @@ try {
         $mail->isHTML(true);
         $mail->Subject = 'Your Login Verification Code';
 
+        $expiryTime = date('g:i A', strtotime($expiresAt));
         $mail->Body =
-            '<p>Your login verification code is:</p>'
+            '<h2>Barangay Document Request and Tracking System</h2>'
+            . '<p>Your log-in code is:</p>'
             . '<h2>' . e($otp) . '</h2>'
-            . '<p>This code expires in 5 minutes.</p>'
-            . '<p>Do not share this code with anyone.</p>';
+            . '<p>This code expires at ' . e($expiryTime)
+            . ' Philippine time (in 5 minutes).</p>'
+            . '<p>If you did not request this code, ignore this email and consider changing your password.</p>';
 
         $mail->AltBody =
-            "Your login verification code is: {$otp}. "
-            . "This code expires in 5 minutes.";
+            "Barangay Document Request and Tracking System\n"
+            . "Your log-in code is: {$otp}.\n"
+            . "This code expires at {$expiryTime} Philippine time (in 5 minutes).\n"
+            . "If you did not request this code, ignore this email and consider changing your password.";
 
         $mail->send();
         // Record successful login OTP email delivery.

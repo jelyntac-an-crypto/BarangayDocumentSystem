@@ -29,30 +29,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const warningBox = document.createElement('div');
 
     warningBox.id = 'session-warning';
+    warningBox.className = 'session-warning';
     warningBox.setAttribute('role', 'alert');
     warningBox.setAttribute('aria-live', 'assertive');
-
-    warningBox.style.cssText = `
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-        max-width: 350px;
-        padding: 18px;
-        background: #fff3cd;
-        color: #664d03;
-        border: 1px solid #ffecb5;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        font-family: Arial, sans-serif;
-    `;
 
     warningBox.innerHTML = `
         <strong>Session Expiring Soon</strong>
         <p>Your session will expire due to inactivity.</p>
         <p id="session-countdown">Logging out in 60 seconds.</p>
-        <button type="button" id="continue-session">
+        <button type="button" id="continue-session" class="session-warning__button">
             Continue Session
         </button>
     `;
@@ -94,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Show the one-minute warning.
     function showWarning() {
-        warningBox.style.display = 'block';
+        warningBox.classList.add('is-visible');
 
         let remainingSeconds = 60;
 
@@ -124,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         clearTimeout(logoutTimer);
         clearInterval(countdownTimer);
 
-        warningBox.style.display = 'none';
+        warningBox.classList.remove('is-visible');
 
         warningTimer = setTimeout(showWarning, WARNING_TIME);
         logoutTimer = setTimeout(logoutUser, LOGOUT_TIME);

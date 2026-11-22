@@ -1,0 +1,394 @@
+.my-requests-page {
+    width: min(1150px, 92%);
+    margin: 35px auto 60px;
+    color: #263b31;
+}
+
+.requests-heading {
+    margin-bottom: 25px;
+}
+
+.requests-heading h1 {
+    margin-bottom: 8px;
+    color: #176b45;
+    font-size: 28px;
+}
+
+.requests-heading p {
+    color: #66756c;
+    line-height: 1.6;
+}
+
+.requests-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.back-button,
+.new-request-button {
+    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-button {
+    background: #e8f1eb;
+    color: #176b45;
+}
+
+.new-request-button {
+    background: #176b45;
+    color: #fff;
+}
+
+.back-button:hover {
+    background: #dcebe1;
+}
+
+.new-request-button:hover {
+    background: #105536;
+}
+
+.requests-panel {
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e2eae4;
+    border-radius: 10px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+}
+
+.requests-filter {
+    margin-bottom: 20px;
+}
+
+.requests-filter form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.requests-filter label {
+    font-weight: 600;
+}
+
+.requests-filter select {
+    min-width: 190px;
+    padding: 10px;
+    border: 1px solid #cbd8cf;
+    border-radius: 6px;
+    background: #fff;
+    color: #263b31;
+}
+
+.requests-filter button {
+    padding: 10px 17px;
+    border: 0;
+    border-radius: 6px;
+    background: #176b45;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.requests-filter button:hover {
+    background: #105536;
+}
+
+.clear-filter {
+    color: #176b45;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.request-count {
+    margin-bottom: 14px;
+    color: #66756c;
+    font-size: 14px;
+}
+
+.requests-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.requests-table th,
+.requests-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #e7eee9;
+    vertical-align: middle;
+}
+
+.requests-table th {
+    background: #f3f8f4;
+    color: #315542;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.requests-table td {
+    color: #43534a;
+    font-size: 14px;
+}
+
+.request-status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-review {
+    background: #dceeff;
+    color: #155a91;
+}
+
+.status-approved {
+    background: #d8f3df;
+    color: #176b45;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #842029;
+}
+
+.status-ready {
+    background: #d9f0f0;
+    color: #176568;
+}
+
+.status-claimed {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.status-default {
+    background: #eeeeee;
+    color: #444;
+}
+
+.view-request-button {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #e8f1eb;
+    color: #176b45;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.view-request-button:hover {
+    background: #d5e8da;
+}
+
+.requests-empty {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.requests-empty h2 {
+    margin-bottom: 10px;
+    color: #315542;
+}
+
+.requests-empty p {
+    margin-bottom: 20px;
+    color: #66756c;
+    line-height: 1.6;
+}
+
+.requests-empty a {
+    display: inline-block;
+    padding: 11px 18px;
+    border-radius: 7px;
+    background: #176b45;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.request-error {
+    padding: 14px;
+    border: 1px solid #f1bfc3;
+    border-radius: 7px;
+    background: #f8d7da;
+    color: #842029;
+}
+
+@media (max-width: 650px) {
+    .my-requests-page {
+        width: 94%;
+        margin-top: 24px;
+    }
+
+    .requests-panel {
+        padding: 15px;
+    }
+
+    .requests-heading h1 {
+        font-size: 23px;
+    }
+
+    .requests-filter form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .requests-filter select,
+    .requests-filter button {
+        width: 100%;
+    }
+
+    .requests-table th,
+    .requests-table td {
+        padding: 11px 9px;
+    }
+}
+/* My Requests page aligned with the warm resident dashboard theme. */
+body.my-requests-body {
+    --requests-ink: #1f1d1a;
+    --requests-muted: #6d655c;
+    --requests-accent: #9a6236;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #e6dfd4, #d6ccbe);
+    color: var(--requests-ink);
+    font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+}
+body.my-requests-body .my-requests-page {
+    flex: 1;
+    width: min(100%, 1400px);
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.5rem);
+}
+body.my-requests-body .requests-heading {
+    margin: 0 0 1.1rem;
+    padding: clamp(1.35rem, 3vw, 2.2rem);
+    border: 1px solid rgba(255,255,255,.78);
+    border-radius: 24px;
+    background:
+        linear-gradient(90deg, rgba(255,250,243,.96), rgba(255,250,243,.83) 58%, rgba(255,250,243,.46)),
+        url("../../images/barangay-hall.jpg") center / cover no-repeat;
+    box-shadow: 0 18px 40px -30px rgba(60,40,20,.5);
+}
+body.my-requests-body .requests-heading h1 {
+    margin: 0 0 .3rem;
+    color: var(--requests-ink);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 400;
+}
+body.my-requests-body .requests-heading p { margin: 0; color: #4a443d; }
+body.my-requests-body .requests-actions { gap: .65rem; margin-top: .85rem; }
+body.my-requests-body .back-button,
+body.my-requests-body .requests-actions .new-request-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: .6rem 1rem;
+    border-radius: 999px;
+    font-size: .88rem;
+}
+body.my-requests-body .back-button { border: 1px solid rgba(42,38,34,.18); background: rgba(255,255,255,.68); color: #2a2622; }
+body.my-requests-body .back-button:hover { background: #fff; }
+body.my-requests-body .requests-actions .new-request-button { background: #2a2622; color: #fff; }
+body.my-requests-body .requests-actions .new-request-button:hover { background: #14120f; }
+body.my-requests-body .requests-panel {
+    padding: clamp(1rem, 2.2vw, 1.6rem);
+    border: 1px solid rgba(255,255,255,.82);
+    border-radius: 20px;
+    background: rgba(255,252,247,.88);
+    box-shadow: 0 16px 38px -28px rgba(45,35,25,.4);
+}
+body.my-requests-body .requests-filter { margin-bottom: .8rem; }
+body.my-requests-body .requests-filter form { gap: .6rem; }
+body.my-requests-body .requests-filter label { color: #3c352e; font-size: .88rem; font-weight: 600; }
+body.my-requests-body .requests-filter select {
+    min-height: 2.6rem;
+    padding: .5rem .75rem;
+    border: 1px solid #d8cfc2;
+    border-radius: 10px;
+    background: #fff;
+    color: #2c2925;
+    font: inherit;
+    font-size: .88rem;
+}
+body.my-requests-body .requests-filter select:focus { outline: 3px solid rgba(154,98,54,.18); border-color: #9a6236; }
+body.my-requests-body .requests-filter button {
+    min-height: 2.6rem;
+    padding: .55rem .95rem;
+    border: 0;
+    border-radius: 999px;
+    background: #2a2622;
+    color: #fff;
+    font: inherit;
+    font-size: .86rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+body.my-requests-body .requests-filter button:hover { background: #14120f; }
+body.my-requests-body .clear-filter { color: #80552f; font-size: .86rem; }
+body.my-requests-body .request-count { margin: 0 0 .7rem; color: var(--requests-muted); font-size: .82rem; }
+body.my-requests-body .requests-table-wrapper { border: 1px solid #e8e1d7; border-radius: 14px; }
+body.my-requests-body .requests-table { min-width: 820px; }
+body.my-requests-body .requests-table th,
+body.my-requests-body .requests-table td { padding: .75rem .7rem; border-bottom: 1px solid #eee8df; }
+body.my-requests-body .requests-table th { background: #f3eee7; color: #554c42; font-size: .73rem; letter-spacing: .04em; text-transform: uppercase; }
+body.my-requests-body .requests-table td { color: #443d35; font-size: .84rem; }
+body.my-requests-body .requests-table tbody tr:last-child td { border-bottom: 0; }
+body.my-requests-body .requests-table tbody tr:hover { background: rgba(201,162,122,.08); }
+body.my-requests-body .request-status { padding: .28rem .6rem; font-size: .73rem; }
+body.my-requests-body .view-request-button,
+body.my-requests-body .requests-empty a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.2rem;
+    padding: .45rem .75rem;
+    border: 1px solid rgba(42,38,34,.16);
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    color: #342d26;
+    font-size: .78rem;
+}
+body.my-requests-body .view-request-button:hover,
+body.my-requests-body .requests-empty a:hover { background: #eee5d9; }
+body.my-requests-body .requests-empty { padding: clamp(1.5rem, 5vw, 3rem) 1rem; }
+body.my-requests-body .requests-empty h2 { color: var(--requests-ink); font-family: "Fraunces", Georgia, serif; font-size: 1.45rem; font-weight: 400; }
+body.my-requests-body .requests-empty p { color: var(--requests-muted); }
+body.my-requests-body .request-error { border-color: #efc1bd; border-radius: 12px; background: #fff0ed; color: #a63e36; }
+body.my-requests-body .site-footer { margin-top: auto; }
+@media (max-width: 650px) {
+    body.my-requests-body .my-requests-page { padding: .85rem; }
+    body.my-requests-body .requests-heading { padding: 1.2rem; border-radius: 20px; }
+    body.my-requests-body .requests-actions { align-items: stretch; flex-direction: column; }
+    body.my-requests-body .requests-actions a { width: 100%; }
+    body.my-requests-body .requests-panel { padding: .85rem; border-radius: 16px; }
+    body.my-requests-body .requests-filter form { align-items: stretch; }
+    body.my-requests-body .requests-filter select,
+    body.my-requests-body .requests-filter button { width: 100%; }
+}

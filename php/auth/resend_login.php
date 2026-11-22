@@ -202,22 +202,23 @@ try {
         $mail->isHTML(true);
         $mail->Subject = 'New Login Verification Code';
 
+        $expiryTime = date('g:i A', time() + 300);
         $mail->Body = '
             <h2>Barangay Document Request and Tracking System</h2>
-            <h3>New Login Verification Code</h3>
-            <p>Your new 6-digit login verification code is:</p>
+            <h3>Your log-in code</h3>
+            <p>Your new 6-digit verification code is:</p>
             <h1>' . e($otp) . '</h1>
-            <p>This code expires in 5 minutes.</p>
+            <p>This code expires at ' . e($expiryTime) . ' Philippine time (in 5 minutes).</p>
             <p>Your previous unused login code is no longer valid.</p>
-            <p>Do not share this code with anyone.</p>
+            <p>If you did not request this code, ignore this email and consider changing your password.</p>
         ';
 
         $mail->AltBody =
-            "New Login Verification Code\n"
-            . "Your new 6-digit login verification code is: {$otp}\n"
-            . "This code expires in 5 minutes.\n"
+            "Barangay Document Request and Tracking System\n"
+            . "Your log-in code is: {$otp}\n"
+            . "This code expires at {$expiryTime} Philippine time (in 5 minutes).\n"
             . "Your previous unused login code is no longer valid.\n"
-            . "Do not share this code with anyone.";
+            . "If you did not request this code, ignore this email and consider changing your password.";
 
         $mail->send();
 

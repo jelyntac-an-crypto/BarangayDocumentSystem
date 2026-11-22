@@ -3,6 +3,58 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/mailer.php';
 
+
+/**
+ * Enforce the shared OTP cooldown and resend window for password recovery.
+ * The first code plus at most three resends may be issued within 15 minutes.
+ */
+function getPasswordResetOtpThrottle(PDO $pdo, string $userId): array
+{
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*) AS issued_count,
+                COALESCE(
+                    TIMESTAMPDIFF(SECOND, MAX(created_at), NOW()),
+                    60
+                ) AS seconds_since_last,
+                GREATEST(
+                    0,
+                    TIMESTAMPDIFF(
+                        SECOND,
+                        NOW(),
+                        DATE_ADD(MIN(created_at), INTERVAL 15 MINUTE)
+                    )
+                ) AS window_remaining
+         FROM email_otps
+         WHERE user_id = ?
+           AND purpose = 'password_reset'
+           AND created_at >= NOW() - INTERVAL 15 MINUTE"
+    );
+    $stmt->execute([$userId]);
+    $rate = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    $issuedCount = (int) ($rate['issued_count'] ?? 0);
+    $secondsSinceLast = (int) ($rate['seconds_since_last'] ?? 60);
+    $windowRemaining = (int) ($rate['window_remaining'] ?? 0);
+
+    if ($issuedCount >= 4) {
+        return [
+            'allowed' => false,
+            'message' => 'You have reached the maximum of 3 reset-code resends within 15 minutes. Please try again in '
+                . $windowRemaining
+                . ' seconds.'
+        ];
+    }
+
+    if ($issuedCount > 0 && $secondsSinceLast < 60) {
+        $remaining = 60 - max(0, $secondsSinceLast);
+        return [
+            'allowed' => false,
+            'message' => 'Please wait ' . $remaining . ' seconds before requesting another reset code.'
+        ];
+    }
+
+    return ['allowed' => true, 'message' => ''];
+}
+
 // Record a failed recovery attempt in login_attempts.
 
 function recordRecoveryLoginAttempt(

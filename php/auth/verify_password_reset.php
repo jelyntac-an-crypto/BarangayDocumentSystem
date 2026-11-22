@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/init.php';
 require_once dirname(__DIR__) . '/layout.php';
+require_once __DIR__ . '/recovery_security.php';
 
 // Allow GET and POST requests only.
 if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'], true)) {
@@ -32,6 +33,16 @@ if (
 
 $message = $_SESSION['password_reset_otp_message'] ?? '';
 unset($_SESSION['password_reset_otp_message']);
+
+$resendThrottle = getPasswordResetOtpThrottle($pdo, $userId);
+$resendRemaining = 0;
+$resendStatus = 'You can request another reset code now.';
+if (!$resendThrottle['allowed']) {
+    $resendStatus = $resendThrottle['message'];
+    if (preg_match('/(\d+) seconds?/i', $resendStatus, $match) === 1) {
+        $resendRemaining = max(0, (int) $match[1]);
+    }
+}
 
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $userAgent = substr(
@@ -252,61 +263,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Verify Password Reset</title>
-
+    <title>Password Reset Verification | Barangay Document Portal</title>
     <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/auth/verify_registration.css">
+    <link rel="stylesheet" href="../../css/auth/login.css">
 </head>
-<body>
+<body class="auth-page">
 
     <?php renderSiteHeader('login', '../../'); ?>
 
-    <div class="verification-container">
-        <h2>Password Reset Verification</h2>
-    </div>
+    <main class="login-container">
+        <section class="login-card">
+            <p class="login-kicker">Secure Account Recovery</p>
+            <h2>Check your email</h2>
+            <p class="login-description">
+                Enter the six-digit password reset code sent to your registered email address.
+            </p>
 
-    <p>Enter the 6-digit password reset code sent to your registered email address.</p>
+            <?php if ($message !== ''): ?>
+                <p class="notice-message" role="alert" aria-live="polite"><?= e($message) ?></p>
+            <?php endif; ?>
 
-    <?php if ($message !== ''): ?>
-        <p role="alert"><?= e($message) ?></p>
-    <?php endif; ?>
+            <form method="POST" action="verify_password_reset.php">
+                <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
+                <div class="form-group">
+                    <label for="otp">Verification Code</label>
+                    <input
+                        type="text"
+                        id="otp"
+                        name="otp"
+                        class="otp-input"
+                        maxlength="6"
+                        minlength="6"
+                        pattern="[0-9]{6}"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="000000"
+                        required
+                    >
+                </div>
+                <button class="login-button" type="submit">Verify Reset Code</button>
+            </form>
 
-    <form method="POST" action="verify_password_reset.php">
+            <form method="POST" action="resend_password_reset.php" class="resend-form">
+                <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
+                <button
+                    class="login-button"
+                    type="submit"
+                    id="resend-reset-code-button"
+                    <?= $resendRemaining > 0 ? 'disabled' : '' ?>
+                >Resend Reset Code</button>
+                <p
+                    id="resend-countdown"
+                    role="status"
+                    aria-live="polite"
+                    data-remaining="<?= $resendRemaining ?>"
+                ><?= e($resendStatus) ?></p>
+            </form>
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(generateCsrfToken()) ?>"
-        >
-
-        <label for="otp">Verification Code</label>
-
-        <input
-            type="text"
-            id="otp"
-            name="otp"
-            maxlength="6"
-            minlength="6"
-            pattern="[0-9]{6}"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            required
-        >
-
-        <button type="submit">Verify Reset Code</button>
-
-    </form>
-
-    <p>
-        <a href="forgot_password.php">Request a new reset code</a>
-    </p>
-
-    <p>
-        <a href="login.php">Back to Login</a>
-    </p>
+            <div class="login-links">
+                <p><a href="login.php">Back to Login</a></p>
+            </div>
+        </section>
+    </main>
 
     <?php renderSiteFooter(); ?>
 
+    <script src="../../js/auth/verify_password_reset.js" defer></script>
 </body>
 </html>

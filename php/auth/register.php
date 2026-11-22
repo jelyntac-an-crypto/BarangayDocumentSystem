@@ -23,7 +23,6 @@ function oldValue(array $oldInput, string $field): string
     return e($oldInput[$field] ?? '');
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +39,14 @@ function oldValue(array $oldInput, string $field): string
     <?php renderSiteHeader('register', '../../'); ?>
 
     <main class="register-container">
-        <h1>Resident Registration</h1>
+
+        <div class="register-intro">
+            <h1>Resident Registration</h1>
+            <p>
+                Create your account to request barangay documents and track them online.
+                Fields marked <span class="required">*</span> are required.
+            </p>
+        </div>
 
     <form method="POST" action="register_process.php">
 
@@ -50,8 +56,12 @@ function oldValue(array $oldInput, string $field): string
             value="<?= e($csrfToken) ?>"
         >
 
+        <section class="form-section">
         <h2>Account Information</h2>
 
+        <div class="form-grid">
+
+        <div class="field">
         <label for="id_number">ID Number <span class="required">*</span></label>
         <input
             type="text"
@@ -72,7 +82,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['id_number'])): ?>
             <p class="field-error"><?= e($errors['id_number']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="username">Username <span class="required">*</span></label>
         <input
             type="text"
@@ -89,7 +101,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['username'])): ?>
             <p class="field-error"><?= e($errors['username']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field field--full">
         <label for="email">Email Address <span class="required">*</span></label>
         <input
             type="email"
@@ -105,7 +119,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['email'])): ?>
             <p class="field-error"><?= e($errors['email']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="password">Password <span class="required">*</span></label>
         <input
             type="password"
@@ -122,7 +138,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['password'])): ?>
             <p class="field-error"><?= e($errors['password']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="confirm_password">Confirm Password <span class="required">*</span></label>
         <input
             type="password"
@@ -138,9 +156,17 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['confirm_password'])): ?>
             <p class="field-error"><?= e($errors['confirm_password']) ?></p>
         <?php endif; ?>
+        </div>
 
+        </div>
+        </section>
+
+        <section class="form-section">
         <h2>Personal Information</h2>
 
+        <div class="form-grid">
+
+        <div class="field">
         <label for="first_name">First Name <span class="required">*</span></label>
         <input
             type="text"
@@ -158,7 +184,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['first_name'])): ?>
             <p class="field-error"><?= e($errors['first_name']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="middle_name">Middle Name <span class="optional">optional</span></label>
         <input
             type="text"
@@ -175,7 +203,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['middle_name'])): ?>
             <p class="field-error"><?= e($errors['middle_name']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="last_name">Family Name <span class="required">*</span></label>
         <input
             type="text"
@@ -193,7 +223,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['last_name'])): ?>
             <p class="field-error"><?= e($errors['last_name']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="name_extension">Name Extension <span class="optional">optional</span></label>
         <select name="name_extension" id="name_extension">
             <option value="" <?= ($oldInput['name_extension'] ?? '') === '' ? 'selected' : '' ?>>None</option>
@@ -207,7 +239,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['name_extension'])): ?>
             <p class="field-error"><?= e($errors['name_extension']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="other_name_extension">If Other, enter your extension <span class="optional">optional</span></label>
         <input
             type="text"
@@ -224,7 +258,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['other_name_extension'])): ?>
             <p class="field-error"><?= e($errors['other_name_extension']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="birth_date">Birthdate <span class="required">*</span></label>
         <input
             type="date"
@@ -239,7 +275,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['birth_date'])): ?>
             <p class="field-error"><?= e($errors['birth_date']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="age">Age <span class="required">*</span></label>
         <input
             type="number"
@@ -250,7 +288,9 @@ function oldValue(array $oldInput, string $field): string
         >
 
         <p id="age-feedback-class" class="field-error" aria-live="polite"></p>
+        </div>
 
+        <div class="field">
         <label for="sex">Sex <span class="required">*</span></label>
         <select name="sex" id="sex" required>
             <option value="">Select sex</option>
@@ -263,9 +303,17 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['sex'])): ?>
             <p class="field-error"><?= e($errors['sex']) ?></p>
         <?php endif; ?>
+        </div>
 
+        </div>
+        </section>
+
+        <section class="form-section">
         <h2>Resident Information</h2>
 
+        <div class="form-grid">
+
+        <div class="field">
         <label for="contact_number">Contact Number <span class="required">*</span></label>
         <input
             type="tel"
@@ -285,7 +333,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['contact_number'])): ?>
             <p class="field-error"><?= e($errors['contact_number']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="purok_street">Purok/Street <span class="required">*</span></label>
         <input
             type="text"
@@ -303,7 +353,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['purok_street'])): ?>
             <p class="field-error"><?= e($errors['purok_street']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="barangay">Barangay <span class="required">*</span></label>
         <input
             type="text"
@@ -321,7 +373,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['barangay'])): ?>
             <p class="field-error"><?= e($errors['barangay']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="municipality_city">Municipality/City <span class="required">*</span></label>
         <input
             type="text"
@@ -339,7 +393,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['municipality_city'])): ?>
             <p class="field-error"><?= e($errors['municipality_city']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="province">Province <span class="required">*</span></label>
         <input
             type="text"
@@ -357,7 +413,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['province'])): ?>
             <p class="field-error"><?= e($errors['province']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="country">Country <span class="required">*</span></label>
         <input
             type="text"
@@ -375,7 +433,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['country'])): ?>
             <p class="field-error"><?= e($errors['country']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="zip_code">ZIP Code <span class="required">*</span></label>
         <input
             type="text"
@@ -393,7 +453,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['zip_code'])): ?>
             <p class="field-error"><?= e($errors['zip_code']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field">
         <label for="civil_status">Civil Status <span class="required">*</span></label>
         <select name="civil_status" id="civil_status" required>
             <option value="">Select civil status</option>
@@ -408,7 +470,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['civil_status'])): ?>
             <p class="field-error"><?= e($errors['civil_status']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field field--full">
         <label for="national_id_number">National ID Number (16-digit PCN) <span class="required">*</span></label>
         <input
             type="text"
@@ -427,9 +491,17 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['national_id_number'])): ?>
             <p class="field-error"><?= e($errors['national_id_number']) ?></p>
         <?php endif; ?>
+        </div>
 
+        </div>
+        </section>
+
+        <section class="form-section">
         <h2>Security Questions</h2>
 
+        <div class="form-grid">
+
+        <div class="field field--full">
         <label for="security_q1">What was the name of your first pet? <span class="required">*</span></label>
         <input
             type="text"
@@ -445,7 +517,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['security_q1'])): ?>
             <p class="field-error"><?= e($errors['security_q1']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field field--full">
         <label for="security_q4">What is your mother's maiden first name? <span class="required">*</span></label>
         <input
             type="text"
@@ -460,7 +534,9 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['security_q4'])): ?>
             <p class="field-error"><?= e($errors['security_q4']) ?></p>
         <?php endif; ?>
+        </div>
 
+        <div class="field field--full">
         <label for="security_q6">What was the first song you learned by heart? <span class="required">*</span></label>
         <input
             type="text"
@@ -476,18 +552,23 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['security_q6'])): ?>
             <p class="field-error"><?= e($errors['security_q6']) ?></p>
         <?php endif; ?>
+        </div>
 
+        </div>
+        </section>
+
+        <section class="form-section">
         <h2>Privacy Notice and Consent</h2>
 
         <p>
             Please read our
-            <a href="privacy_notice.php" target="_blank" rel="noopener noreferrer">
+            <a href="privacy_notice.php" id="privacy-notice-link" target="_blank" rel="noopener noreferrer" aria-haspopup="dialog">
                 Privacy Notice
             </a>
             before registering.
         </p>
 
-        <label>
+        <label class="consent">
             <input
                 type="checkbox"
                 id="privacy_consent"
@@ -505,8 +586,10 @@ function oldValue(array $oldInput, string $field): string
         <?php if (isset($errors['privacy_consent'])): ?>
             <p class="field-error"><?= e($errors['privacy_consent']) ?></p>
         <?php endif; ?>
+        </section>
 
         <!-- CAPTCHA verification -->
+        <section class="form-section">
         <h2>Human Verification</h2>
 
         <p>Please enter the six characters shown in the image.</p>
@@ -543,10 +626,22 @@ function oldValue(array $oldInput, string $field): string
             <label>Leave this field empty</label>
             <input type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
+        </section>
 
-        <button type="submit">Register</button>
+        <button type="submit" class="register-submit">Register</button>
+
+        <p class="register-login">
+            Already have an account? <a href="login.php">Log in here</a>
+        </p>
 
     </form>
+    <dialog class="privacy-modal" id="privacy-notice-dialog" aria-labelledby="privacy-modal-title">
+        <div class="privacy-modal__heading">
+            <h2 id="privacy-modal-title">Privacy Notice</h2>
+            <button type="button" id="privacy-modal-close" aria-label="Close privacy notice">Close</button>
+        </div>
+        <iframe id="privacy-notice-frame" title="Barangay privacy notice" loading="lazy"></iframe>
+    </dialog>
     </main>
 
     <?php renderSiteFooter(); ?>
@@ -555,5 +650,3 @@ function oldValue(array $oldInput, string $field): string
 
 </body>
 </html>
-
-

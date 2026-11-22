@@ -53,12 +53,12 @@ require_once dirname(__DIR__) . '/layout.php';
     <link rel="stylesheet" href="../../css/admin/dashboard.css">
 
     <!-- Chart.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../js/chart.umd.min.js"></script>
 
     <!-- Dashboard JavaScript -->
     <script src="../../js/admin/dashboard.js" defer></script>
 </head>
-<body>
+<body class="admin-dashboard-body">
 
     <?php renderSiteHeader('default', '../../'); ?>
 

@@ -24,6 +24,22 @@ if (
 $message = $_SESSION['registration_otp_message'] ?? '';
 unset($_SESSION['registration_otp_message']);
 
+// Show the remaining resend cooldown from the latest server-issued OTP.
+$resendRemaining = 0;
+$stmt = $pdo->prepare(
+    "SELECT TIMESTAMPDIFF(SECOND, created_at, NOW())
+     FROM email_otps
+     WHERE user_id = ?
+       AND purpose = 'registration'
+     ORDER BY created_at DESC, id DESC
+     LIMIT 1"
+);
+$stmt->execute([$userId]);
+$secondsSinceSent = $stmt->fetchColumn();
+if ($secondsSinceSent !== false) {
+    $resendRemaining = max(0, 60 - (int) $secondsSinceSent);
+}
+
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
 
@@ -222,66 +238,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/auth/verify_registration.css">
     <title>Verify Registration</title>
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/auth/login.css">
 </head>
-<body>
+<body class="auth-page">
 
-    <?php renderSiteHeader('default', '../../'); ?>
-    <div class="verification-container">
-        <h2>Email Verification</h2>
-    </div>
+    <?php renderSiteHeader('login', '../../'); ?>
 
-    <p>Enter the 6-digit verification code sent to your registered email address.</p>
+    <main class="login-container">
+        <p class="login-subtitle">Two-Step Verification</p>
 
-    <?php if ($message !== ''): ?>
-        <p role="alert"><?= e($message) ?></p>
-    <?php endif; ?>
+        <section class="login-card">
+            <h2>Verify your email</h2>
+            <p class="login-description">
+                Enter the 6-digit verification code sent to your registered email address.
+            </p>
 
-    <form method="POST" action="verify_registration.php">
+            <?php if ($message !== ''): ?>
+                <p class="notice-message" role="alert"><?= e($message) ?></p>
+            <?php endif; ?>
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(generateCsrfToken()) ?>"
-        >
+            <form method="POST" action="verify_registration.php">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= e(generateCsrfToken()) ?>"
+                >
 
-        <label for="otp">Verification Code</label>
+                <div class="form-group">
+                    <label for="otp">Verification Code</label>
+                    <input
+                        type="text"
+                        id="otp"
+                        name="otp"
+                        class="otp-input"
+                        maxlength="6"
+                        minlength="6"
+                        pattern="[0-9]{6}"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        placeholder="000000"
+                        required
+                    >
+                </div>
 
-        <input
-            type="text"
-            id="otp"
-            name="otp"
-            maxlength="6"
-            minlength="6"
-            pattern="[0-9]{6}"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            required
-        >
+                <button type="submit">Verify Email</button>
+            </form>
 
-        <button type="submit">Verify Email</button>
+            <form method="POST" action="resend_registration.php" class="resend-form">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= e(generateCsrfToken()) ?>"
+                >
+                <button
+                    type="submit"
+                    id="resend-otp-button"
+                    <?= $resendRemaining > 0 ? 'disabled' : '' ?>
+                >Resend OTP</button>
+                <p
+                    id="resend-countdown"
+                    role="status"
+                    aria-live="polite"
+                    data-remaining="<?= $resendRemaining ?>"
+                >
+                    <?php if ($resendRemaining > 0): ?>
+                        You can request another OTP in <?= $resendRemaining ?> seconds.
+                    <?php endif; ?>
+                </p>
+            </form>
 
-    </form>
-    <form method="POST" action="resend_registration.php">
-
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="<?= e(generateCsrfToken()) ?>"
-    >
-
-    <button type="submit" id="resend-otp-button">Resend OTP</button>
-
-    <p id="resend-countdown" aria-live="polite"></p>
-
-</form>
-<div>
-    <script src="../../js/auth/verify_registration.js" defer></script>
-</div>
+            <div class="login-links">
+                <a href="login.php">Cancel and return to login</a>
+            </div>
+        </section>
+    </main>
 
     <?php renderSiteFooter(); ?>
 
+    <script src="../../js/auth/verify_registration.js" defer></script>
 </body>
 </html>

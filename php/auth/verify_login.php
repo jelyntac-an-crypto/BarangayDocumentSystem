@@ -42,9 +42,6 @@ unset($_SESSION['login_otp_message']);
 
 $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
 
-$sessionUsername = $_SESSION['pending_login_username'] ?? null;
-$userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
 // Get the remaining OTP resend cooldown.
 $resendRemaining = 0;
 $resendLimitReached = false;
@@ -92,7 +89,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ipAddress,
             $userAgent
         );
-
 
         http_response_code(403);
         exit('Invalid request.');
@@ -218,9 +214,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $otpRecord['id']
                 ]);
 
-                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-                $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
                 // Record the failed OTP attempt.
                 $stmt = $pdo->prepare(
                     "INSERT INTO login_attempts
@@ -300,9 +293,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stmt->execute([$userId]);
 
-                $ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-                $userAgent = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
-
                 // Record completed login.
                 $stmt = $pdo->prepare(
                     "INSERT INTO login_attempts
@@ -317,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $userAgent
                 ]);
 
-                // Record successful login activity.       
+                // Record successful login activity.
                 recordActivity(
                     $pdo,
                     $userId,
@@ -394,83 +384,104 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Verification</title>
     <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/auth/verify_registration.css">
+    <link rel="stylesheet" href="../../css/auth/login.css">
 </head>
-<body>
+<body class="auth-page">
 
     <?php renderSiteHeader('login', '../../'); ?>
 
-    <div class="verification-container">
-        <h2>Login Verification</h2>
-    </div>
+    <main class="login-container">
 
-    <p>Enter the 6-digit login verification code sent to your registered email address.</p>
+        <p class="login-subtitle">Two-Step Verification</p>
 
-    <?php if ($message !== ''): ?>
-        <p role="alert"><?= e($message) ?></p>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['pending_login_user_id'])): ?>
+        <section class="login-card">
 
-    <form method="POST" action="verify_login.php">
+            <h2>Check your email</h2>
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(generateCsrfToken()) ?>"
-        >
+            <p class="login-description">
+                Enter the 6-digit login verification code sent to your registered email address.
+            </p>
 
-        <label for="otp">Verification Code</label>
-
-        <input
-            type="text"
-            id="otp"
-            name="otp"
-            maxlength="6"
-            minlength="6"
-            pattern="[0-9]{6}"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            required
-        >
-
-        <button type="submit">Verify Login</button>
-
-    </form>
-    
-    <form method="POST" action="resend_login.php" id="resend-otp-form">
-
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(generateCsrfToken()) ?>"
-        >
-
-        <button
-            type="submit"
-            id="resend-otp-button"
-            <?= ($resendRemaining > 0 || $resendLimitReached) ? 'disabled' : '' ?>
-        >
-            Resend OTP
-        </button>
-
-        <p id="resend-countdown" role="status">
-            <?php if ($resendLimitReached): ?>
-                Maximum resend requests reached. Please try again later.
-            <?php elseif ($resendRemaining > 0): ?>
-                You can request another OTP in <?= $resendRemaining ?> seconds.
+            <?php if ($message !== ''): ?>
+                <p class="notice-message" role="alert"><?= e($message) ?></p>
             <?php endif; ?>
-        </p>
 
-    </form>
-    <?php endif; ?>
+            <?php if (isset($_SESSION['pending_login_user_id'])): ?>
 
+                <form method="POST" action="verify_login.php">
 
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= e(generateCsrfToken()) ?>"
+                    >
 
-<p><a href="login.php">Cancel and return to login</a></p>
+                    <div class="form-group">
+                        <label for="otp">Verification Code</label>
 
+                        <input
+                            type="text"
+                            id="otp"
+                            name="otp"
+                            class="otp-input"
+                            maxlength="6"
+                            minlength="6"
+                            pattern="[0-9]{6}"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            placeholder="000000"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit">Verify Login</button>
+
+                </form>
+
+                <form method="POST" action="resend_login.php" id="resend-otp-form" class="resend-form">
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= e(generateCsrfToken()) ?>"
+                    >
+
+                    <button
+                        type="submit"
+                        id="resend-otp-button"
+                        <?= ($resendRemaining > 0 || $resendLimitReached) ? 'disabled' : '' ?>
+                    >
+                        Resend OTP
+                    </button>
+
+                    <p
+                        id="resend-countdown"
+                        role="status"
+                        aria-live="polite"
+                        data-remaining="<?= $resendRemaining ?>"
+                    >
+                        <?php if ($resendLimitReached): ?>
+                            Maximum resend requests reached. Please try again later.
+                        <?php elseif ($resendRemaining > 0): ?>
+                            You can request another OTP in <?= $resendRemaining ?> seconds.
+                        <?php endif; ?>
+                    </p>
+
+                </form>
+
+            <?php endif; ?>
+
+            <div class="login-links">
+                <a href="login.php">Cancel and return to login</a>
+            </div>
+
+        </section>
+
+    </main>
 
     <?php renderSiteFooter(); ?>
+
+    <script src="../../js/auth/verify_login.js" defer></script>
 
 </body>
 </html>

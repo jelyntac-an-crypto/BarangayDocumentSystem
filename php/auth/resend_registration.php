@@ -170,21 +170,22 @@ recordActivity(
         $mail->isHTML(true);
         $mail->Subject = 'New Verification Code - Barangay Document Request and Tracking System';
 
+        $expiryTime = date('g:i A', time() + 300);
         $mail->Body = '
             <h2>Barangay Document Request and Tracking System</h2>
-            <h3>New Registration Verification Code</h3>
+            <h3>Verify your account</h3>
             <p>Your new 6-digit verification code is:</p>
             <h1>' . e($otp) . '</h1>
-            <p>This code expires in 5 minutes.</p>
+            <p>This code expires at ' . e($expiryTime) . ' Philippine time (in 5 minutes).</p>
             <p>Your previous unused registration code is no longer valid.</p>
             <p>If you did not request this code, ignore this email and consider changing your password.</p>
         ';
 
         $mail->AltBody =
             "Barangay Document Request and Tracking System\n"
-            . "New Registration Verification Code\n"
+            . "Verify your account\n"
             . "Your new 6-digit verification code is: {$otp}\n"
-            . "This code expires in 5 minutes.\n"
+            . "This code expires at {$expiryTime} Philippine time (in 5 minutes).\n"
             . "Your previous unused registration code is no longer valid.\n"
             . "If you did not request this code, ignore this email and consider changing your password.";
 

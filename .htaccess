@@ -1,0 +1,13 @@
+# Disable Apache directory indexes in the project and its subdirectories.
+Options -Indexes
+
+# Do not serve dotfiles, editor backups, database dumps, or private config files.
+<FilesMatch "(^\.|\.bak$|\.sql$|^config\.php$)">
+    Require all denied
+</FilesMatch>
+
+# Deny direct requests to hidden paths such as .git and .env.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\. - [F,L]
+</IfModule>

@@ -1,8 +1,11 @@
 <?php
 declare(strict_types=1);
 
-// Prevent the website from being displayed inside an iframe.
-header('X-Frame-Options: DENY');
+// Block framing everywhere, except the static privacy notice when it is embedded
+// in the same-origin registration dialog.
+$isEmbeddedPrivacyNotice = basename((string) ($_SERVER['SCRIPT_NAME'] ?? '')) === 'privacy_notice.php'
+    && (($_GET['embed'] ?? '') === '1');
+header('X-Frame-Options: ' . ($isEmbeddedPrivacyNotice ? 'SAMEORIGIN' : 'DENY'));
 
 // Prevent browsers from guessing the content type.
 header('X-Content-Type-Options: nosniff');

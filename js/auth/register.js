@@ -1,5 +1,22 @@
-﻿
+
 document.addEventListener('DOMContentLoaded', function () {
+    const privacyLink = document.getElementById('privacy-notice-link');
+    const privacyDialog = document.getElementById('privacy-notice-dialog');
+    const privacyFrame = document.getElementById('privacy-notice-frame');
+    const privacyClose = document.getElementById('privacy-modal-close');
+
+    if (privacyLink && privacyDialog && privacyFrame && privacyClose) {
+        privacyLink.addEventListener('click', function (event) {
+            if (typeof privacyDialog.showModal !== 'function') return;
+            event.preventDefault();
+            privacyFrame.src = 'privacy_notice.php?embed=1';
+            privacyDialog.showModal();
+        });
+        privacyClose.addEventListener('click', function () { privacyDialog.close(); });
+        privacyDialog.addEventListener('click', function (event) {
+            if (event.target === privacyDialog) privacyDialog.close();
+        });
+    }
 console.log('REGISTER JS: DOMContentLoaded started');
 
     const idNumberInput = document.getElementById('id_number');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/init.php';
 require_once dirname(__DIR__) . '/layout.php';
 
+
 // Generate CSRF token.
 $csrfToken = generateCsrfToken();
 
@@ -17,13 +18,33 @@ if ($notice === '') {
 
 $lockoutUntil = (int) ($_SESSION['login_lockout_until'] ?? 0);
 $lockoutRemaining = max(0, $lockoutUntil - time());
+
+// Load any active IP block so the login page can show its real remaining time.
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$stmt = $pdo->prepare(
+    'SELECT GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expires_at))
+     FROM ip_blocks
+     WHERE ip_address = ? AND expires_at > NOW()
+     ORDER BY expires_at DESC
+     LIMIT 1'
+);
+$stmt->execute([$ipAddress]);
+$ipBlockRemaining = max(0, (int) ($stmt->fetchColumn() ?: 0));
+
+$activeLockoutType = $ipBlockRemaining > 0
+    ? 'ip'
+    : ($lockoutRemaining > 0 ? 'account' : '');
+$activeLockoutRemaining = $ipBlockRemaining > 0
+    ? $ipBlockRemaining
+    : $lockoutRemaining;
 $showForgotPassword = !empty($_SESSION['show_forgot_password']);
 
 if ($lockoutRemaining <= 0) {
     unset($_SESSION['login_lockout_until']);
 }
 
-unset($_SESSION['login_errors'], $_SESSION['login_notice'],  $_SESSION['password_reset_message']);
+unset($_SESSION['login_errors'], $_SESSION['login_notice'], $_SESSION['password_reset_message']);
+
 // Escape output.
 function loginEscape(?string $value): string
 {
@@ -45,15 +66,15 @@ function loginEscape(?string $value): string
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/auth/login.css">
 </head>
-<body>
+<body class="auth-page">
 
     <?php renderSiteHeader('login', '../../'); ?>
 
     <main class="login-container">
 
-        <p class="login-subtitle">Secure Account Login</p>
-
         <section class="login-card">
+
+            <p class="login-kicker">Secure Account Login</p>
 
             <h2>Log In</h2>
 
@@ -61,19 +82,22 @@ function loginEscape(?string $value): string
                 Enter your username and password to access your account.
             </p>
 
-            <?php if ($notice !== '' || $lockoutRemaining > 0): ?>
+            <?php if ($notice !== '' || $activeLockoutRemaining > 0): ?>
                 <p
                     id="lockout-message"
-        class="notice-message <?= $lockoutRemaining > 0 ? 'lockout-message' : '' ?>"
-        data-remaining="<?= $lockoutRemaining ?>"
-        role="status"
-        aria-live="polite"
-    >
-        <?= $lockoutRemaining > 0
-            ? 'Account temporarily locked. Please wait.'
-            : loginEscape($notice) ?>
-    </p>
-<?php endif; ?>
+                    class="notice-message <?= $activeLockoutRemaining > 0 ? 'lockout-message' : '' ?>"
+                    data-remaining="<?= $activeLockoutRemaining ?>"
+                    data-lockout-type="<?= loginEscape($activeLockoutType) ?>"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <?= $activeLockoutRemaining > 0
+                        ? ($activeLockoutType === 'ip'
+                            ? 'This IP address is temporarily blocked. Please wait.'
+                            : 'Account temporarily locked. Please wait.')
+                        : loginEscape($notice) ?>
+                </p>
+            <?php endif; ?>
 
             <form
                 id="login-form"
@@ -136,10 +160,10 @@ function loginEscape(?string $value): string
                     </p>
                 </div>
 
-                <div class="form-group">
-                    <label>Human Verification</label>
+                <div class="form-group captcha">
+                    <p class="group-title">Human Verification</p>
 
-                    <p>
+                    <p class="hint">
                         Enter the six characters shown in the image.
                     </p>
 

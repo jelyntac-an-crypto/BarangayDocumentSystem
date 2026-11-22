@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/init.php';
 require_once dirname(__DIR__) . '/layout.php';
+$isPrivacyEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
 ?>
 
 <!DOCTYPE html>
@@ -15,9 +16,9 @@ require_once dirname(__DIR__) . '/layout.php';
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/auth/privacy_notice.css">
 </head>
-<body class="privacy-page">
+<body class="privacy-page<?= $isPrivacyEmbed ? ' privacy-page--embedded' : '' ?>">
 
-    <?php renderSiteHeader('default', '../../'); ?>
+    <?php if (!$isPrivacyEmbed) renderSiteHeader('default', '../../'); ?>
     <main class="privacy-container">
         <article class="privacy-content">
 
@@ -51,10 +52,11 @@ require_once dirname(__DIR__) . '/layout.php';
                     <li>Residential address</li>
                     <li>Civil status</li>
                     <li>National ID Number (PCN)</li>
-                    <li>Username and password</li>
-                    <li>Security question answers</li>
+                    <li>Username and password credential (password stored as a hash)</li>
+                    <li>Security-question answers (stored as hashes)</li>
                     <li>Document request details</li>
                     <li>Uploaded supporting requirements</li>
+                    <li>Authentication and security records, including OTP/CAPTCHA attempts, timestamps, IP address, and browser details</li>
                 </ul>
             </section>
 
@@ -147,10 +149,7 @@ require_once dirname(__DIR__) . '/layout.php';
                 </ul>
 
                 <p>
-                    The system also processes necessary personal
-                    information to provide request status updates,
-                    protect accounts against unauthorized access,
-                    and maintain security and activity records.
+                    The system also processes account activity, OTP/CAPTCHA attempts, IP address, browser details, and timestamps to provide status updates, protect accounts, prevent abuse, and investigate security events.
                 </p>
             </section>
 
@@ -158,10 +157,7 @@ require_once dirname(__DIR__) . '/layout.php';
                 <h2>3. Data Protection</h2>
 
                 <p>
-                    The system uses password hashing, encryption for
-                    National ID information, access controls, prepared
-                    database statements, and security measures to help
-                    protect stored personal information.
+                    The system hashes passwords, security answers, and one-time codes, encrypts National ID information in the database, and uses access controls and prepared database statements. These safeguards reduce risk but cannot guarantee that unauthorized access will never occur.
                 </p>
 
                 <p>
@@ -172,92 +168,77 @@ require_once dirname(__DIR__) . '/layout.php';
 
             <section>
                 <h2>4. Data Retention</h2>
-
                 <p>
-                    Personal information will be retained only for as
-                    long as necessary for document processing, security,
-                    legal obligations, and applicable barangay
-                    recordkeeping requirements.
+                    The system owner has not yet supplied an approved retention
+                    schedule. The Barangay must set and publish a retention period
+                    for each record category and securely dispose of or archive
+                    records when that period ends, subject to applicable laws and
+                    official records requirements.
                 </p>
-
-                <p>
-                    Retention and disposal of personal information
-                    will follow the barangay's approved records
-                    retention and disposal policies.
-                </p>
+                <p><strong>Retention schedule:</strong> Pending Barangay approval.</p>
             </section>
 
             <section>
                 <h2>5. Data Sharing</h2>
-
                 <p>
-                    Personal information will not be disclosed to
-                    unauthorized persons. Information may be accessed
-                    by authorized barangay personnel or disclosed
-                    when required by applicable law.
+                    Account and request information may be accessed by authorized
+                    barangay personnel for account support, identity and eligibility
+                    checks, document processing, and security administration.
+                    Information may be disclosed when required by law. Any outside
+                    service provider or additional recipient must be approved by
+                    the Barangay and covered by appropriate safeguards.
                 </p>
             </section>
 
             <section>
                 <h2>6. Your Rights</h2>
-
                 <p>
-                    Subject to applicable law, you have the right to
-                    be informed about the processing of your personal
-                    information and may request access to or correction
-                    of your personal data.
-                </p>
-
-                <p>
-                    You may also exercise other applicable rights
-                    under the Data Privacy Act of 2012, including
-                    the right to object, request blocking or erasure
-                    where legally applicable, and lodge a complaint
-                    with the National Privacy Commission.
-                </p>
-
-                <p>
-                    For privacy-related concerns, you may contact
-                    the Barangay Office through its official
-                    contact channels.
+                    Subject to applicable law, you may ask to be informed about the
+                    processing of your personal information and request access,
+                    correction, objection, blocking, or erasure where applicable.
+                    You may also raise a concern with the National Privacy
+                    Commission.
                 </p>
             </section>
 
             <section>
                 <h2>7. Contact Information</h2>
-
                 <p>
-                    For questions, concerns, or requests regarding
-                    your personal information, please contact the
-                    Barangay Office or its designated Data Protection
-                    Officer through the barangay's official contact
-                    channels.
+                    For privacy questions or requests, contact the Barangay Office
+                    through its official channels and ask for the designated Data
+                    Protection Officer or privacy contact. The Barangay must add
+                    its official name and contact details here before publishing
+                    this notice.
                 </p>
+                <ul>
+                    <li>Barangay: [OFFICIAL BARANGAY NAME TO BE ADDED]</li>
+                    <li>Privacy contact: [OFFICIAL DPO / CONTACT TO BE ADDED]</li>
+                    <li>Email / telephone: [OFFICIAL CONTACT DETAILS TO BE ADDED]</li>
+                </ul>
             </section>
 
             <section>
-                <h2>8. Consent</h2>
-
+                <h2>8. Consent and lawful processing</h2>
                 <p>
-                    By checking the consent box during registration,
-                    you confirm that you have read this Privacy Notice
-                    and agree to the collection and processing of your
-                    personal information for the purposes explained
-                    above.
+                    The registration form records your privacy-consent choice and
+                    the time it was given. The Barangay should identify the lawful
+                    basis for each purpose of processing; consent is not necessarily
+                    the only lawful basis for every system function.
                 </p>
             </section>
 
             <p class="last-updated">
                 <strong>Last updated:</strong> November 2026
             </p>
-
-            <a class="back-link" href="register.php">
-                Back to Registration
-            </a>
+            <?php if (!$isPrivacyEmbed): ?>
+                <a class="back-link" href="register.php">
+                    Back to Registration
+                </a>
+            <?php endif; ?>
 
         </article>
     </main>
-    <?php renderSiteFooter(); ?>
+    <?php if (!$isPrivacyEmbed) renderSiteFooter(); ?>
 
 </body>
 </html>

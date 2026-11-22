@@ -1,0 +1,281 @@
+.new-request-page {
+    width: min(900px, 92%);
+    margin: 35px auto;
+    min-height: 65vh;
+}
+
+.request-heading {
+    margin-bottom: 25px;
+}
+
+.request-heading h1 {
+    color: #176b45;
+    margin-bottom: 8px;
+}
+
+.request-heading p {
+    color: #555;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #176b45;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.request-form {
+    background: #fff;
+    padding: 28px;
+    border: 1px solid #e2e8e4;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #26382e;
+}
+
+.form-group label span {
+    color: #777;
+    font-weight: 400;
+}
+
+.form-group select,
+.form-group textarea,
+.form-group input[type="file"] {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #cbd5ce;
+    border-radius: 7px;
+    background: #fff;
+    font: inherit;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group select:focus,
+.form-group textarea:focus,
+.form-group input[type="file"]:focus {
+    outline: 2px solid #77b995;
+    border-color: #176b45;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 7px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.submit-request-button {
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 7px;
+    background: #176b45;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.submit-request-button:hover {
+    background: #105536;
+}
+
+.request-success,
+.request-errors,
+.form-notice {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.request-success {
+    background: #e8f5ec;
+    border: 1px solid #a8d5b5;
+    color: #155b32;
+}
+
+.request-errors {
+    background: #fff0f0;
+    border: 1px solid #e8b4b4;
+    color: #8b2525;
+}
+
+.request-errors ul {
+    margin-bottom: 0;
+    padding-left: 22px;
+}
+
+.form-notice {
+    background: #fff8e5;
+    border: 1px solid #ead69b;
+    color: #705719;
+}
+
+@media (max-width: 600px) {
+    .new-request-page {
+        margin: 22px auto;
+    }
+
+    .request-form {
+        padding: 18px;
+    }
+
+    .submit-request-button {
+        width: 100%;
+    }
+}
+/* New request page styling aligned with the resident dashboard theme. */
+body.new-request-body {
+    --request-ink: #1f1d1a;
+    --request-muted: #6d655c;
+    --request-accent: #9a6236;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #e6dfd4, #d6ccbe);
+    color: var(--request-ink);
+    font-family: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+}
+body.new-request-body .new-request-page {
+    flex: 1;
+    width: min(100%, 1120px);
+    margin: 0 auto;
+    padding: clamp(1rem, 3vw, 2.5rem);
+}
+body.new-request-body .request-heading {
+    position: relative;
+    overflow: hidden;
+    margin: 0 0 1.1rem;
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+    border: 1px solid rgba(255,255,255,.78);
+    border-radius: 24px;
+    background:
+        linear-gradient(90deg, rgba(255,250,243,.96), rgba(255,250,243,.83) 58%, rgba(255,250,243,.46)),
+        url("../../images/barangay-hall.jpg") center / cover no-repeat;
+    box-shadow: 0 18px 40px -30px rgba(60,40,20,.5);
+}
+body.new-request-body .request-heading h1 {
+    margin: 0 0 .35rem;
+    color: var(--request-ink);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 400;
+    line-height: 1.15;
+}
+body.new-request-body .request-heading p { margin: 0; color: #4a443d; }
+body.new-request-body .back-link {
+    display: inline-flex;
+    align-items: center;
+    margin-top: .85rem;
+    padding: .5rem .9rem;
+    border: 1px solid rgba(42,38,34,.18);
+    border-radius: 999px;
+    background: rgba(255,255,255,.68);
+    color: #2a2622;
+    font-size: .86rem;
+    text-decoration: none;
+}
+body.new-request-body .back-link:hover { background: #fff; text-decoration: none; }
+body.new-request-body .request-form {
+    max-width: 820px;
+    margin: 0 auto 1.5rem;
+    padding: clamp(1.2rem, 3vw, 2rem);
+    border: 1px solid rgba(255,255,255,.85);
+    border-radius: 22px;
+    background: rgba(255,252,247,.9);
+    box-shadow: 0 18px 45px -30px rgba(45,35,25,.42);
+}
+body.new-request-body .form-group { margin-bottom: 1rem; }
+body.new-request-body .form-group label {
+    display: block;
+    margin-bottom: .35rem;
+    color: #302b26;
+    font-size: .9rem;
+    font-weight: 600;
+}
+body.new-request-body .form-group label span { color: var(--request-muted); font-size: .82rem; }
+body.new-request-body .form-group select,
+body.new-request-body .form-group textarea,
+body.new-request-body .form-group input[type="file"] {
+    width: 100%;
+    border: 1px solid #d8cfc2;
+    border-radius: 12px;
+    background: rgba(255,255,255,.9);
+    color: #2c2925;
+    font: inherit;
+    font-size: .92rem;
+}
+body.new-request-body .form-group select { min-height: 2.9rem; padding: .55rem .8rem; }
+body.new-request-body .form-group textarea { min-height: 8rem; padding: .75rem .85rem; line-height: 1.5; resize: vertical; }
+body.new-request-body .form-group input[type="file"] { padding: .55rem; }
+body.new-request-body .form-group input[type="file"]::file-selector-button {
+    margin-right: .7rem;
+    padding: .45rem .75rem;
+    border: 0;
+    border-radius: 8px;
+    background: #eee5d9;
+    color: #342d26;
+    font: inherit;
+    cursor: pointer;
+}
+body.new-request-body .form-group select:focus,
+body.new-request-body .form-group textarea:focus,
+body.new-request-body .form-group input[type="file"]:focus {
+    outline: 3px solid rgba(154,98,54,.18);
+    border-color: #9a6236;
+}
+body.new-request-body .form-group small { display: block; margin-top: .35rem; color: var(--request-muted); font-size: .8rem; line-height: 1.45; }
+body.new-request-body .submit-request-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.8rem;
+    padding: .65rem 1.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: #2a2622;
+    color: #fff;
+    font: inherit;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .15s, transform .15s;
+}
+body.new-request-body .submit-request-button:hover { background: #14120f; transform: translateY(-1px); }
+body.new-request-body .request-success,
+body.new-request-body .request-errors,
+body.new-request-body .form-notice { margin-bottom: 1rem; border-radius: 12px; font-size: .9rem; }
+body.new-request-body .request-success { border-color: #b6d5bd; background: #edf7ef; color: #28613b; }
+body.new-request-body .request-errors { border-color: #efc1bd; background: #fff0ed; color: #a63e36; }
+body.new-request-body .form-notice { border-color: #e8d6aa; background: #fff8e9; color: #725a25; }
+body.new-request-body .site-footer { margin-top: auto; }
+@media (max-width: 620px) {
+    body.new-request-body .new-request-page { padding: .85rem; }
+    body.new-request-body .request-heading { padding: 1.2rem; border-radius: 20px; }
+    body.new-request-body .request-form { padding: 1rem; border-radius: 18px; }
+    body.new-request-body .submit-request-button { width: 100%; }
+}

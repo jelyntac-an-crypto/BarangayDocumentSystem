@@ -78,7 +78,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     /*
      * STEP 1: Username and CAPTCHA.
      */
-    if ($submittedStep === 'identify') {
+    if ($submittedStep === 'restart') {
+
+        unset(
+            $_SESSION['password_recovery_stage'],
+            $_SESSION['password_recovery_username'],
+            $_SESSION['password_recovery_created_at'],
+            $_SESSION['pending_password_reset_user_id'],
+            $_SESSION['pending_password_reset_created_at'],
+            $_SESSION['verified_password_reset_user_id'],
+            $_SESSION['verified_password_reset_created_at']
+        );
+
+        $stage = 'identify';
+        $message = '';
+
+    } elseif ($submittedStep === 'identify') {
 
         // Remove any previous recovery session.
         unset(
@@ -174,9 +189,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ? $questionCode
                 : '';
 
-            $answer = is_string($answer) ? trim($answer) : '';
+            $answer = is_string($answer) ? strtolower(trim($answer)) : '';
             $confirmAnswer = is_string($confirmAnswer)
-                ? trim($confirmAnswer)
+                ? strtolower(trim($confirmAnswer))
                 : '';
 
             $stage = 'security';
@@ -310,7 +325,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      * Generate and email the password reset OTP.
                      */
                     if ($answerCorrect && $user) {
+                        $otpThrottle = getPasswordResetOtpThrottle(
+                            $pdo,
+                            (string) $user['id_number']
+                        );
 
+                        if (!$otpThrottle['allowed']) {
+                            $message = $otpThrottle['message'];
+                        } else {
                         $otp = (string) random_int(100000, 999999);
                         $otpHash = password_hash($otp, PASSWORD_DEFAULT);
 
@@ -335,17 +357,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 (string) $user['id_number']
                             ]);
 
-                            // Create the new OTP with a 5-minute expiry.
+                            // Create the new OTP with a five-minute expiry.
+                            $otpExpiry = date('Y-m-d H:i:s', time() + 300);
                             $stmt = $pdo->prepare(
                                 "INSERT INTO email_otps
                                  (user_id, otp_hash, purpose, expires_at)
-                                 VALUES (?, ?, 'password_reset',
-                                         DATE_ADD(NOW(), INTERVAL 5 MINUTE))"
+                                 VALUES (?, ?, 'password_reset', ?)"
                             );
 
                             $stmt->execute([
                                 (string) $user['id_number'],
-                                $otpHash
+                                $otpHash,
+                                $otpExpiry
                             ]);
 
                             $otpId = (int) $pdo->lastInsertId();
@@ -381,17 +404,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $mail->Subject =
                                 'Password Reset Verification Code';
 
+                            $expiryTime = date('g:i A', strtotime($otpExpiry));
                             $mail->Body =
                                 '<h2>Barangay Document Request and Tracking System</h2>'
                                 . '<p>Your password reset verification code is:</p>'
                                 . '<h1>' . e($otp) . '</h1>'
-                                . '<p>This code expires in 5 minutes.</p>'
-                                . '<p>If you did not request this code, please ignore this email.</p>';
+                                . '<p>This code expires at ' . e($expiryTime)
+                                . ' Philippine time (in 5 minutes).</p>'
+                                . '<p>If you did not request this code, ignore this email and consider changing your password.</p>';
 
                             $mail->AltBody =
-                                "Your password reset verification code is: {$otp}. "
-                                . "This code expires in 5 minutes. "
-                                . "If you did not request this code, ignore this email.";
+                                "Barangay Document Request and Tracking System\n"
+                                . "Your password reset verification code is: {$otp}.\n"
+                                . "This code expires at {$expiryTime} Philippine time (in 5 minutes).\n"
+                                . "If you did not request this code, ignore this email and consider changing your password.";
 
                             $mail->send();
 
@@ -448,6 +474,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'Unable to send the reset code. '
                                 . 'Please try again later.';
                         }
+                        }
                     }
 
                 } catch (Throwable $error) {
@@ -470,48 +497,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Load the question choices for the current recovery username.
-// All registered users normally have Q1, Q4, and Q6.
-// For an unknown username, the same choices are displayed.
-if ($stage === 'security') {
-
-    $sessionUsername = $_SESSION['password_recovery_username'] ?? '';
-
-    try {
-
-        $stmt = $pdo->prepare(
-            "SELECT sa.question_code
-             FROM security_answers sa
-             INNER JOIN users u ON u.id_number = sa.user_id
-             WHERE u.username = ?
-               AND u.account_status = 'active'
-             ORDER BY FIELD(sa.question_code, 'Q1', 'Q4', 'Q6')"
-        );
-
-        $stmt->execute([$sessionUsername]);
-        $codes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        if ($codes) {
-
-            $selectedQuestions = [];
-
-            foreach ($codes as $code) {
-                if (isset($questionLabels[$code])) {
-                    $selectedQuestions[$code] = $questionLabels[$code];
-                }
-            }
-        }
-
-    } catch (Throwable $error) {
-
-        error_log(
-            'Password recovery question loading error: '
-            . $error->getMessage()
-        );
-
-        $selectedQuestions = $questionLabels;
-    }
-}
+// The seeded security question bank is the same for every account.
+// Showing a fixed list also prevents account enumeration by question count.
+$selectedQuestions = $questionLabels;
 ?>
 
 <!DOCTYPE html>
@@ -519,193 +507,127 @@ if ($stage === 'security') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Forgot Password</title>
-
+    <title>Forgot Password | Barangay Document Portal</title>
     <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/auth/verify_registration.css">
+    <link rel="stylesheet" href="../../css/auth/login.css">
 </head>
-<body>
+<body class="auth-page">
 
     <?php renderSiteHeader('login', '../../'); ?>
 
-    <div class="verification-container">
-
-        <h2>Forgot Password</h2>
-
-        <?php if ($message !== ''): ?>
-            <p role="status"><?= e($message) ?></p>
-        <?php endif; ?>
-
-        <?php if ($stage === 'identify'): ?>
-
-            <p>
-                Enter your username and solve the CAPTCHA
-                to continue password recovery.
+    <main class="login-container">
+        <section class="login-card recovery-card">
+            <p class="login-kicker">Secure Account Recovery</p>
+            <h2>Forgot Password</h2>
+            <p class="login-description">
+                Verify your account details to reset your password securely.
             </p>
 
-            <form method="POST" action="forgot_password.php">
+            <?php if ($message !== ''): ?>
+                <p class="notice-message recovery-message" role="status" aria-live="polite">
+                    <?= e($message) ?>
+                </p>
+            <?php endif; ?>
 
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="<?= e(generateCsrfToken()) ?>"
-                >
+            <?php if ($stage === 'identify'): ?>
+                <form method="POST" action="forgot_password.php" autocomplete="on">
+                    <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
+                    <input type="hidden" name="step" value="identify">
 
-                <input type="hidden" name="step" value="identify">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            minlength="8"
+                            maxlength="19"
+                            pattern="[A-Za-z][A-Za-z0-9]{7,18}"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
 
-                <label for="username">Username</label>
+                    <div class="form-group captcha">
+                        <p class="group-title">Human Verification</p>
+                        <p class="hint">Enter the six characters shown in the image.</p>
+                        <div class="captcha-container">
+                            <img
+                                src="captcha.php?purpose=forgot_password"
+                                id="captcha-image"
+                                alt="Forgot Password CAPTCHA verification image"
+                                width="190"
+                                height="65"
+                            >
+                            <button type="button" id="refresh-captcha" aria-label="Refresh CAPTCHA">
+                                Refresh CAPTCHA
+                            </button>
+                        </div>
+                        <label for="captcha_answer">Enter CAPTCHA</label>
+                        <input
+                            type="text"
+                            id="captcha_answer"
+                            name="captcha_answer"
+                            minlength="6"
+                            maxlength="6"
+                            pattern="[A-Za-z0-9]{6}"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
 
-                <input
-                    type="text"
-                    id="username"
-                    name="username"
-                    minlength="8"
-                    maxlength="19"
-                    pattern="[A-Za-z][A-Za-z0-9]{7,18}"
-                    autocomplete="username"
-                    required
-                >
+                    <button class="login-button" type="submit">Continue</button>
+                </form>
 
-                <p>Enter the six characters shown in the image.</p>
+            <?php elseif ($stage === 'security'): ?>
+                <form method="POST" action="forgot_password.php" autocomplete="off">
+                    <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
+                    <input type="hidden" name="step" value="security">
 
-                <div class="captcha-container">
+                    <div class="form-group">
+                        <label for="question_code">Security question</label>
+                        <select id="question_code" name="question_code" required>
+                            <option value="">Select a security question</option>
+                            <?php foreach ($selectedQuestions as $code => $label): ?>
+                                <option value="<?= e($code) ?>"><?= e($label) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                    <img
-                        src="captcha.php?purpose=forgot_password"
-                        id="captcha-image"
-                        alt="Forgot Password CAPTCHA verification image"
-                        width="190"
-                        height="65"
-                    >
+                    <div class="form-group">
+                        <label for="answer">Your Answer</label>
+                        <input type="text" id="answer" name="answer" minlength="2" maxlength="50" pattern="[A-Za-z]+( [A-Za-z]+)*" autocomplete="off" required>
+                    </div>
 
-                    <button
-                        type="button"
-                        id="refresh-captcha"
-                    >
-                        Refresh CAPTCHA
-                    </button>
+                    <div class="form-group">
+                        <label for="confirm_answer">Re-enter Answer</label>
+                        <input type="text" id="confirm_answer" name="confirm_answer" minlength="2" maxlength="50" pattern="[A-Za-z]+( [A-Za-z]+)*" autocomplete="off" required>
+                    </div>
 
-                </div>
+                    <button class="login-button" type="submit">Verify Answer</button>
+                </form>
 
-                <label for="captcha_answer">Enter CAPTCHA</label>
+                <form class="recovery-back-form" method="POST" action="forgot_password.php">
+                    <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
+                    <input type="hidden" name="step" value="restart">
+                    <button class="recovery-back-button" type="submit">Back to Username and CAPTCHA</button>
+                </form>
 
-                <input
-                    type="text"
-                    id="captcha_answer"
-                    name="captcha_answer"
-                    minlength="6"
-                    maxlength="6"
-                    pattern="[A-Za-z0-9]{6}"
-                    autocomplete="off"
-                    required
-                >
+            <?php elseif ($stage === 'complete' && $showVerificationLink): ?>
+                <p class="recovery-next-step">
+                    Your recovery details were accepted. Continue to email verification to finish resetting your password.
+                </p>
+                <a class="login-button recovery-continue" href="verify_password_reset.php">Continue to OTP Verification</a>
+            <?php endif; ?>
 
-                <button type="submit">Continue</button>
-
-            </form>
-
-        <?php elseif ($stage === 'security'): ?>
-
-            <p>
-                Choose the following question and enter your answer.
-            </p>
-
-            <form method="POST" action="forgot_password.php">
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="<?= e(generateCsrfToken()) ?>"
-                >
-
-                <input type="hidden" name="step" value="security">
-
-                <label for="question_code">
-                    Choose the following question
-                </label>
-
-                <select
-                    id="question_code"
-                    name="question_code"
-                    required
-                >
-                    <option value="">Select a security question</option>
-
-                    <?php foreach ($selectedQuestions as $code => $label): ?>
-                        <option value="<?= e($code) ?>">
-                            <?= e($label) ?>
-                        </option>
-                    <?php endforeach; ?>
-
-                </select>
-
-                <label for="answer">Your Answer</label>
-
-                <input
-                    type="text"
-                    id="answer"
-                    name="answer"
-                    minlength="2"
-                    maxlength="50"
-                    pattern="[A-Za-z]+( [A-Za-z]+)*"
-                    autocomplete="off"
-                    required
-                >
-
-                <label for="confirm_answer">Re-enter Answer</label>
-
-                <input
-                    type="text"
-                    id="confirm_answer"
-                    name="confirm_answer"
-                    minlength="2"
-                    maxlength="50"
-                    pattern="[A-Za-z]+( [A-Za-z]+)*"
-                    autocomplete="off"
-                    required
-                >
-
-                <button type="submit">Verify Answer</button>
-
-            </form>
-
-        <?php elseif ($stage === 'complete' && $showVerificationLink): ?>
-
-            <p>
-                Continue to OTP verification to complete your password recovery.
-            </p>
-
-            <a href="verify_password_reset.php">
-                Continue to OTP Verification
-            </a>
-
-        <?php endif; ?>
-
-        <p>
-            <a href="login.php">Back to Login</a>
-        </p>
-
-    </div>
+            <div class="login-links">
+                <p><a href="login.php">Back to Login</a></p>
+            </div>
+        </section>
+    </main>
 
     <?php renderSiteFooter(); ?>
 
-    <script>
-        const captchaImage = document.getElementById('captcha-image');
-        const refreshButton = document.getElementById('refresh-captcha');
-        const captchaInput = document.getElementById('captcha_answer');
-
-        if (captchaImage && refreshButton) {
-            refreshButton.addEventListener('click', function () {
-                captchaImage.src =
-                    'captcha.php?purpose=forgot_password&t=' + Date.now();
-
-                if (captchaInput) {
-                    captchaInput.value = '';
-                }
-            });
-        }
-    </script>
-
+    <script src="../../js/auth/forgot_password.js" defer></script>
 </body>
 </html>

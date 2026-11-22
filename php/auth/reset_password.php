@@ -351,140 +351,76 @@ if (
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Reset Password</title>
-
+    <title>Reset Password | Barangay Document Portal</title>
     <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/auth/verify_registration.css">
+    <link rel="stylesheet" href="../../css/auth/login.css">
+    <link rel="stylesheet" href="../../css/auth/reset-password.css">
 </head>
-<body>
+<body class="auth-page">
 
     <?php renderSiteHeader('login', '../../'); ?>
 
-    <div class="verification-container">
+    <main class="login-container">
+        <section class="login-card reset-password-card">
+            <p class="login-kicker">Secure Account Recovery</p>
+            <h2>Choose a New Password</h2>
+            <p class="login-description">Create a strong password to secure your account.</p>
 
-        <h2>Reset Password</h2>
+            <?php if ($message !== ''): ?>
+                <p class="notice-message" role="alert" aria-live="polite"><?= e($message) ?></p>
+            <?php endif; ?>
 
-        <p>Enter your new password below.</p>
+            <form method="POST" action="reset_password.php" autocomplete="off">
+                <input type="hidden" name="csrf_token" value="<?= e(generateCsrfToken()) ?>">
 
-        <?php if ($message !== ''): ?>
-            <p role="alert"><?= e($message) ?></p>
-        <?php endif; ?>
+                <div class="form-group">
+                    <label for="password">Enter Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        minlength="8"
+                        maxlength="64"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
 
-        <form method="POST" action="reset_password.php">
+                <div class="reset-strength-group">
+                    <p class="reset-strength-label">Password Strength: <strong id="strength-label">Weak</strong></p>
+                    <div
+                        id="strength-meter"
+                        role="progressbar"
+                        aria-label="Password strength"
+                        aria-valuemin="0"
+                        aria-valuemax="4"
+                        aria-valuenow="0"
+                    >
+                        <div id="strength-bar"></div>
+                    </div>
+                    <p class="reset-password-hint">Use at least three of these: lowercase, uppercase, number, and special character.</p>
+                </div>
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="<?= e(generateCsrfToken()) ?>"
-            >
+                <div class="form-group">
+                    <label for="confirm_password">Re-enter Password</label>
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        minlength="8"
+                        maxlength="64"
+                        autocomplete="new-password"
+                        required
+                    >
+                </div>
 
-            <label for="password">Enter Password</label>
-
-            <input
-                type="password"
-                id="password"
-                name="password"
-                minlength="8"
-                maxlength="64"
-                autocomplete="new-password"
-                required
-            >
-
-            <p>
-                Password Strength:
-                <strong id="strength-label">Weak</strong>
-            </p>
-
-            <div
-                id="strength-meter"
-                role="progressbar"
-                aria-label="Password strength"
-                aria-valuemin="0"
-                aria-valuemax="4"
-                aria-valuenow="0"
-                style="height: 8px; background: #ddd; border-radius: 4px;"
-            >
-                <div
-                    id="strength-bar"
-                    style="height: 8px; width: 0%; background: #dc3545; border-radius: 4px;"
-                ></div>
-            </div>
-
-            <p>
-                Use at least three of these:
-                lowercase, uppercase, number, and special character.
-            </p>
-
-            <label for="confirm_password">Re-enter Password</label>
-
-            <input
-                type="password"
-                id="confirm_password"
-                name="confirm_password"
-                minlength="8"
-                maxlength="64"
-                autocomplete="new-password"
-                required
-            >
-
-            <button type="submit">Change Password</button>
-
-        </form>
-
-    </div>
+                <button class="login-button" type="submit">Change Password</button>
+            </form>
+        </section>
+    </main>
 
     <?php renderSiteFooter(); ?>
 
-    <script>
-        const passwordInput = document.getElementById('password');
-        const strengthLabel = document.getElementById('strength-label');
-        const strengthBar = document.getElementById('strength-bar');
-        const strengthMeter = document.getElementById('strength-meter');
-
-        passwordInput.addEventListener('input', function () {
-
-            const password = passwordInput.value;
-
-            let criteriaCount = 0;
-
-            if (/[a-z]/.test(password)) criteriaCount++;
-            if (/[A-Z]/.test(password)) criteriaCount++;
-            if (/[0-9]/.test(password)) criteriaCount++;
-            if (/[^a-zA-Z0-9]/.test(password)) criteriaCount++;
-
-            let strength = 'Weak';
-            let width = 0;
-            let color = '#dc3545';
-
-            if (
-                password.length >= 8 &&
-                password.length <= 64 &&
-                criteriaCount === 3
-            ) {
-                strength = 'Medium';
-                width = 75;
-                color = '#f0ad4e';
-
-            } else if (
-                password.length >= 8 &&
-                password.length <= 64 &&
-                criteriaCount === 4
-            ) {
-                strength = 'Strong';
-                width = 100;
-                color = '#198754';
-
-            } else {
-                width = criteriaCount * 20;
-            }
-
-            strengthLabel.textContent = strength;
-            strengthBar.style.width = width + '%';
-            strengthBar.style.background = color;
-            strengthMeter.setAttribute('aria-valuenow', criteriaCount);
-        });
-    </script>
-
+    <script src="../../js/auth/reset_password.js" defer></script>
 </body>
 </html>

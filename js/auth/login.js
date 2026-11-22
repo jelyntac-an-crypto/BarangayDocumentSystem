@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let countdownInterval = null;
 
     function startLockoutCountdown() {
+    const lockoutType = lockoutMessage?.dataset.lockoutType || 'account';
     let remaining = Number(lockoutMessage?.dataset.remaining || 0);
 
     if (remaining <= 0) {
@@ -31,8 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const registerLink = document.getElementById('register-link');
 
     if (registerLink) {
-        registerLink.style.pointerEvents = 'none';
-        registerLink.style.opacity = '0.5';
+        registerLink.classList.add('is-lockout-disabled');
         registerLink.setAttribute('aria-disabled', 'true');
     }
 
@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', function () {
             loginButton.disabled = false;
 
             if (registerLink) {
-                registerLink.style.pointerEvents = '';
-                registerLink.style.opacity = '';
+                registerLink.classList.remove('is-lockout-disabled');
                 registerLink.removeAttribute('aria-disabled');
             }
 
             lockoutMessage.classList.remove('lockout-message');
-            lockoutMessage.textContent =
-                'Lockout period ended. You may try logging in again.';
+            lockoutMessage.textContent = lockoutType === 'ip'
+                ? 'IP block period ended. You may try logging in again.'
+                : 'Account lockout period ended. You may try logging in again.';
 
             return;
         }
@@ -62,9 +62,10 @@ document.addEventListener('DOMContentLoaded', function () {
             String(minutes).padStart(2, '0') + ':' +
             String(seconds).padStart(2, '0');
 
-        lockoutMessage.textContent =
-            'Account temporarily locked. Please try again in ' +
-            formattedTime + '.';
+        lockoutMessage.textContent = lockoutType === 'ip'
+            ? 'This IP address is temporarily blocked. Try again in '
+                + formattedTime + '.'
+            : 'Account temporarily locked. Try again in ' + formattedTime + '.';
 
         remaining--;
     }

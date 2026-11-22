@@ -1,0 +1,12 @@
+.resident-notification-body { min-height:100vh; display:flex; flex-direction:column; background:#f5f1eb; color:#2a2622; }
+.resident-notification-page { width:min(760px,calc(100% - 2rem)); margin:clamp(2rem,7vh,5rem) auto; flex:1; }
+.resident-notification-back { display:inline-block; margin-bottom:1rem; color:#745132; text-decoration:none; font-weight:600; }
+.resident-notification-card { padding:clamp(1.4rem,4vw,2.5rem); border:1px solid #e4d9cb; border-radius:22px; background:rgba(255,252,247,.94); box-shadow:0 16px 40px rgba(42,32,22,.1); }
+.resident-notification-label { margin:0 0 .55rem; color:#8a6239; font-size:.76rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.resident-notification-card h1 { margin:0; color:#2a2622; font-family:"Fraunces",Georgia,serif; font-size:clamp(1.6rem,4vw,2.2rem); font-weight:500; }
+.resident-notification-message { margin:1rem 0 1.5rem; color:#51483f; font-size:1.05rem; line-height:1.7; }
+.resident-notification-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.5rem 1rem; padding:1rem 0; border-top:1px solid #e8e1d7; color:#746b61; font-size:.86rem; }
+.resident-notification-actions { display:flex; flex-wrap:wrap; gap:.7rem; margin-top:1rem; }
+.resident-notification-actions a { padding:.7rem 1.1rem; border:1px solid #d7c5b0; border-radius:999px; background:#f5eee5; color:#332b23; text-decoration:none; font-weight:600; }
+.resident-notification-actions a:hover { background:#ece0d1; }
+@media(max-width:520px) { .resident-notification-meta { flex-direction:column; } }
