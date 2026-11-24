@@ -231,7 +231,8 @@ $isPrivacyEmbed = isset($_GET['embed']) && $_GET['embed'] === '1';
                 <strong>Last updated:</strong> November 2026
             </p>
             <?php if (!$isPrivacyEmbed): ?>
-                <a class="back-link" href="register.php">
+                <a class="back-link" href="register.php"
+                   onclick="if (window.opener && !window.opener.closed) { window.opener.focus(); window.close(); return false; }">
                     Back to Registration
                 </a>
             <?php endif; ?>

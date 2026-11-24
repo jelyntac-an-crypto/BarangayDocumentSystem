@@ -194,6 +194,10 @@ $securityQ1 = getPostString('security_q1');
 $securityQ4 = getPostString('security_q4');
 $securityQ6 = getPostString('security_q6');
 
+$securityQuestion1 = getPostString('security_question_1');
+$securityQuestion2 = getPostString('security_question_2');
+$securityQuestion3 = getPostString('security_question_3');
+
 // Ensure password fields contain text values.
 if (!is_string($password) || !is_string($confirmPassword)) {
     http_response_code(422);
@@ -376,6 +380,34 @@ if ($privacyConsent !== '1') {
     $errors['privacy_consent'] = 'You must agree to the Privacy Notice to register.';
 }
 
+// Validate selected security questions.
+$allowedSecurityQuestions = ['Q1', 'Q4', 'Q6'];
+
+$selectedSecurityQuestions = [
+    'security_question_1' => $securityQuestion1,
+    'security_question_2' => $securityQuestion2,
+    'security_question_3' => $securityQuestion3
+];
+
+foreach ($selectedSecurityQuestions as $field => $questionCode) {
+    if (!in_array($questionCode, $allowedSecurityQuestions, true)) {
+        $errors[$field] = 'Please choose a valid security question.';
+    }
+}
+
+if (
+    count(array_unique(array_values($selectedSecurityQuestions))) !== 3
+) {
+    foreach ($selectedSecurityQuestions as $field => $questionCode) {
+        if (
+            $questionCode !== '' &&
+            count(array_keys($selectedSecurityQuestions, $questionCode, true)) > 1
+        ) {
+            $errors[$field] = 'Please choose a different security question.';
+        }
+    }
+}
+
 // Validate security answers: letters and single spaces only.
 $securityAnswerFields = [
     'security_q1' => 'Security Answer 1',
@@ -469,9 +501,9 @@ try {
 
 // Hash the security question answers.
 $securityAnswers = [
-    'Q1' => strtolower($securityQ1),
-    'Q4' => strtolower($securityQ4),
-    'Q6' => strtolower($securityQ6)
+    $securityQuestion1 => strtolower($securityQ1),
+    $securityQuestion2 => strtolower($securityQ4),
+    $securityQuestion3 => strtolower($securityQ6)
 ];
 
 $securityAnswerHashes = [];

@@ -5,18 +5,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const privacyFrame = document.getElementById('privacy-notice-frame');
     const privacyClose = document.getElementById('privacy-modal-close');
 
-    if (privacyLink && privacyDialog && privacyFrame && privacyClose) {
-        privacyLink.addEventListener('click', function (event) {
-            if (typeof privacyDialog.showModal !== 'function') return;
-            event.preventDefault();
-            privacyFrame.src = 'privacy_notice.php?embed=1';
-            privacyDialog.showModal();
-        });
-        privacyClose.addEventListener('click', function () { privacyDialog.close(); });
-        privacyDialog.addEventListener('click', function (event) {
-            if (event.target === privacyDialog) privacyDialog.close();
-        });
-    }
 console.log('REGISTER JS: DOMContentLoaded started');
 
     const idNumberInput = document.getElementById('id_number');
@@ -92,6 +80,18 @@ console.log('REGISTER JS: DOMContentLoaded started');
 
     const securityQ6Input = document.getElementById('security_q6');
     const securityQ6Feedback = document.getElementById('security-q6-feedback');
+
+    const securityQuestionSelects = [
+        document.getElementById('security_question_1'),
+        document.getElementById('security_question_2'),
+        document.getElementById('security_question_3')
+    ];
+
+    const securityQuestionFeedbacks = [
+        document.getElementById('security-question-1-feedback'),
+        document.getElementById('security-question-2-feedback'),
+        document.getElementById('security-question-3-feedback')
+    ];
 
     const privacyConsentInput = document.getElementById('privacy_consent');
     const privacyConsentFeedback = document.getElementById('privacy-consent-feedback');
@@ -750,6 +750,50 @@ console.log('REGISTER JS: DOMContentLoaded started');
         );
     }
 
+    // Prevent duplicate security question selections.
+    function updateSecurityQuestionOptions() {
+        const selectedValues = securityQuestionSelects.map(select => select.value);
+
+        securityQuestionSelects.forEach((select, index) => {
+            Array.from(select.options).forEach(option => {
+                if (option.value === '') return;
+
+                option.disabled = selectedValues.some(
+                    (value, otherIndex) =>
+                        otherIndex !== index && value !== '' && value === option.value
+                );
+            });
+        });
+    }
+
+    function checkSecurityQuestionSelections() {
+        let isValid = true;
+        const selectedValues = securityQuestionSelects.map(select => select.value);
+
+        securityQuestionSelects.forEach((select, index) => {
+            const feedback = securityQuestionFeedbacks[index];
+            feedback.textContent = '';
+
+            if (select.value === '') {
+                feedback.textContent = 'Please choose a security question.';
+                isValid = false;
+                return;
+            }
+
+            const duplicate = selectedValues.some(
+                (value, otherIndex) =>
+                    otherIndex !== index && value === select.value
+            );
+
+            if (duplicate) {
+                feedback.textContent = 'Please choose a different security question.';
+                isValid = false;
+            }
+        });
+
+        return isValid;
+    }
+
     function checkPrivacyConsent() {
         privacyConsentFeedback.textContent = '';
 
@@ -956,6 +1000,8 @@ console.log('REGISTER JS: DOMContentLoaded started');
         securityQ6Input.dataset.touched = 'true';
         const isSecurityQ6Valid = checkSecurityQ6();
 
+        const isSecurityQuestionsValid = checkSecurityQuestionSelections();
+
         const isPrivacyConsentValid = checkPrivacyConsent();
 
         if (!isBirthDateValid) {
@@ -1021,6 +1067,24 @@ console.log('REGISTER JS: DOMContentLoaded started');
         if (!isNationalIDValid) {
             event.preventDefault();
             nationalIDInput.focus();
+            return;
+        }
+
+        if (!isSecurityQuestionsValid) {
+            event.preventDefault();
+
+            const firstInvalidQuestion = securityQuestionSelects.find(
+                (select, index) =>
+                    select.value === '' ||
+                    securityQuestionSelects.some(
+                        (other, otherIndex) =>
+                            otherIndex !== index && other.value === select.value
+                    )
+            );
+
+            if (firstInvalidQuestion) {
+                firstInvalidQuestion.focus();
+            }
             return;
         }
 
@@ -1226,6 +1290,15 @@ console.log('REGISTER JS: DOMContentLoaded started');
         nationalIDInput.dataset.touched = 'true';
         checkNationalID();
     });
+
+    securityQuestionSelects.forEach(select => {
+        select.addEventListener('change', function () {
+            updateSecurityQuestionOptions();
+            checkSecurityQuestionSelections();
+        });
+    });
+
+    updateSecurityQuestionOptions();
 
     securityQ1Input.addEventListener('input', function () {
         securityQ1Input.dataset.touched = 'true';

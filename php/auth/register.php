@@ -110,6 +110,7 @@ function oldValue(array $oldInput, string $field): string
             id="email"
             name="email"
             maxlength="100"
+            placeholder="example@gmail.com"
             value="<?= oldValue($oldInput, 'email') ?>"
             required
         >
@@ -496,73 +497,82 @@ function oldValue(array $oldInput, string $field): string
         </div>
         </section>
 
-        <section class="form-section">
+                <section class="form-section">
         <h2>Security Questions</h2>
 
         <div class="form-grid">
 
         <div class="field field--full">
-        <label for="security_q1">What was the name of your first pet? <span class="required">*</span></label>
-        <input
-            type="text"
-            name="security_q1"
-            id="security_q1"
-            minlength="2"
-            maxlength="50"
-            required
-        >
+            <label for="security_question_1">Security Question 1 <span class="required">*</span></label>
+            <select name="security_question_1" id="security_question_1" required>
+                <option value="">Choose a security question</option>
+                <option value="Q1">What was the name of your first pet?</option>
+                <option value="Q4">What is your mother's maiden first name?</option>
+                <option value="Q6">What was the first song you learned by heart?</option>
+            </select>
+            <p id="security-question-1-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_question_1'])): ?>
+                <p class="field-error"><?= e($errors['security_question_1']) ?></p>
+            <?php endif; ?>
 
-        <p id="security-q1-feedback" class="field-error" aria-live="polite"></p>
-
-        <?php if (isset($errors['security_q1'])): ?>
-            <p class="field-error"><?= e($errors['security_q1']) ?></p>
-        <?php endif; ?>
+            <label for="security_q1">Answer <span class="required">*</span></label>
+            <input type="text" name="security_q1" id="security_q1" minlength="2" maxlength="50" required>
+            <p id="security-q1-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_q1'])): ?>
+                <p class="field-error"><?= e($errors['security_q1']) ?></p>
+            <?php endif; ?>
         </div>
 
         <div class="field field--full">
-        <label for="security_q4">What is your mother's maiden first name? <span class="required">*</span></label>
-        <input
-            type="text"
-            name="security_q4"
-            id="security_q4"
-            minlength="2"
-            maxlength="50"
-            required
-        >
-        <p id="security-q4-feedback" class="field-error" aria-live="polite"></p>
+            <label for="security_question_2">Security Question 2 <span class="required">*</span></label>
+            <select name="security_question_2" id="security_question_2" required>
+                <option value="">Choose a security question</option>
+                <option value="Q1">What was the name of your first pet?</option>
+                <option value="Q4">What is your mother's maiden first name?</option>
+                <option value="Q6">What was the first song you learned by heart?</option>
+            </select>
+            <p id="security-question-2-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_question_2'])): ?>
+                <p class="field-error"><?= e($errors['security_question_2']) ?></p>
+            <?php endif; ?>
 
-        <?php if (isset($errors['security_q4'])): ?>
-            <p class="field-error"><?= e($errors['security_q4']) ?></p>
-        <?php endif; ?>
+            <label for="security_q4">Answer <span class="required">*</span></label>
+            <input type="text" name="security_q4" id="security_q4" minlength="2" maxlength="50" required>
+            <p id="security-q4-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_q4'])): ?>
+                <p class="field-error"><?= e($errors['security_q4']) ?></p>
+            <?php endif; ?>
         </div>
 
         <div class="field field--full">
-        <label for="security_q6">What was the first song you learned by heart? <span class="required">*</span></label>
-        <input
-            type="text"
-            name="security_q6"
-            id="security_q6"
-            minlength="2"
-            maxlength="50"
-            required
-        >
+            <label for="security_question_3">Security Question 3 <span class="required">*</span></label>
+            <select name="security_question_3" id="security_question_3" required>
+                <option value="">Choose a security question</option>
+                <option value="Q1">What was the name of your first pet?</option>
+                <option value="Q4">What is your mother's maiden first name?</option>
+                <option value="Q6">What was the first song you learned by heart?</option>
+            </select>
+            <p id="security-question-3-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_question_3'])): ?>
+                <p class="field-error"><?= e($errors['security_question_3']) ?></p>
+            <?php endif; ?>
 
-        <p id="security-q6-feedback" class="field-error" aria-live="polite"></p>
-
-        <?php if (isset($errors['security_q6'])): ?>
-            <p class="field-error"><?= e($errors['security_q6']) ?></p>
-        <?php endif; ?>
+            <label for="security_q6">Answer <span class="required">*</span></label>
+            <input type="text" name="security_q6" id="security_q6" minlength="2" maxlength="50" required>
+            <p id="security-q6-feedback" class="field-error" aria-live="polite"></p>
+            <?php if (isset($errors['security_q6'])): ?>
+                <p class="field-error"><?= e($errors['security_q6']) ?></p>
+            <?php endif; ?>
         </div>
 
         </div>
         </section>
-
-        <section class="form-section">
+<section class="form-section">
         <h2>Privacy Notice and Consent</h2>
 
         <p>
             Please read our
-            <a href="privacy_notice.php" id="privacy-notice-link" target="_blank" rel="noopener noreferrer" aria-haspopup="dialog">
+            <a href="privacy_notice.php" id="privacy-notice-link" target="_blank" rel="opener" aria-haspopup="dialog">
                 Privacy Notice
             </a>
             before registering.
