@@ -175,6 +175,7 @@ function oldValue(array $oldInput, string $field): string
             name="first_name"
             minlength="2"
             maxlength="28"
+            placeholder="Charles"
             pattern="[A-Z][a-zA-Z]*( [A-Z][a-zA-Z]*)*"
             value="<?= oldValue($oldInput, 'first_name') ?>"
             required
@@ -195,6 +196,7 @@ function oldValue(array $oldInput, string $field): string
             name="middle_name"
             minlength="2"
             maxlength="28"
+            placeholder="Tulang"
             pattern="[A-Z][a-zA-Z]*( [A-Z][a-zA-Z]*)*"
             value="<?= oldValue($oldInput, 'middle_name') ?>"
         >
@@ -214,6 +216,7 @@ function oldValue(array $oldInput, string $field): string
             name="last_name"
             minlength="2"
             maxlength="28"
+            placeholder="Seokjin"
             pattern="[A-Z][a-zA-Z]*( [A-Z][a-zA-Z]*)*"
             value="<?= oldValue($oldInput, 'last_name') ?>"
             required

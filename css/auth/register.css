@@ -471,3 +471,105 @@ body.register-page .privacy-modal__heading h2 { margin:0; color:#245c43; font-si
 body.register-page .privacy-modal__heading button { min-height:36px; padding:.35rem .9rem; border:1px solid #245c43; border-radius:999px; background:#245c43; color:#fff; cursor:pointer; }
 body.register-page .privacy-modal iframe { display:block; width:100%; height:calc(100% - 58px); border:0; background:#f3efe7; }
 @media (max-width:560px) { body.register-page .privacy-modal { width:calc(100vw - 16px); height:90vh; border-radius:12px; } }
+/* Multi-step registration navigation */
+body.register-page .register-container form.register-multistep > .form-section {
+    order: 0 !important;
+}
+
+body.register-page .register-container form.register-multistep > .register-step-progress,
+body.register-page .register-container form.register-multistep > .register-step-navigation,
+body.register-page .register-container form.register-multistep > .register-submit,
+body.register-page .register-container form.register-multistep > .register-login {
+    order: 0 !important;
+}
+
+body.register-page .register-multistep .form-section[aria-hidden="true"] {
+    display: none !important;
+}
+
+body.register-page .register-multistep .form-section.is-active {
+    display: block;
+}
+
+body.register-page .register-multistep .register-step-progress {
+    width: 100%;
+    margin: 0 0 .8rem;
+    padding: .75rem .9rem;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,.12);
+}
+
+.register-step-progress__heading {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .55rem;
+    color: #fff;
+    font-size: .82rem;
+    font-weight: 600;
+}
+
+.register-step-progress__track {
+    width: 100%;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255,255,255,.25);
+}
+
+.register-step-progress__fill {
+    width: 16.666%;
+    height: 100%;
+    border-radius: inherit;
+    background: #e9c9a5;
+    transition: width .25s ease;
+}
+
+body.register-page .register-step-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-top: .5rem;
+}
+
+body.register-page .register-step-navigation button {
+    min-width: 110px;
+    min-height: 2.5rem;
+    padding: .55rem 1.1rem;
+    border: 0;
+    border-radius: 999px;
+    background: #e9c9a5;
+    color: #1f1d1a;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+body.register-page .register-step-navigation button:hover {
+    background: #f6dcbc;
+}
+
+body.register-page .register-step-navigation button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+body.register-page .register-step-navigation button[hidden],
+body.register-page .register-multistep .register-submit[hidden] {
+    display: none !important;
+}
+
+body.register-page .register-multistep .register-submit {
+    margin-top: .5rem;
+}
+
+@media (max-width: 480px) {
+    body.register-page .register-step-navigation button {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .register-step-progress__heading {
+        font-size: .75rem;
+    }
+}

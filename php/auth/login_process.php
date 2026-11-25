@@ -488,7 +488,13 @@ try {
                 . $lockSeconds . ' seconds.'
             );
         }
-        returnLoginMessage('Invalid username or password.');
+        $attemptsRemaining = 3 - ($failedCount % 3);
+
+        returnLoginMessage(
+            'Incorrect username or password. '
+            . $attemptsRemaining
+            . ' attempt(s) remaining before temporary account lockout.'
+        );
     }
 
     // Password is correct. Generate the login OTP.

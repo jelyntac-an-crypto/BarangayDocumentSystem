@@ -100,7 +100,11 @@ function loginEscape(?string $value): string
                     <?= $activeLockoutRemaining > 0
                         ? ($activeLockoutType === 'ip'
                             ? 'This IP address is temporarily blocked. Please wait.'
-                            : 'Account temporarily locked. Please wait.')
+                            : loginEscape(
+                            $notice !== ''
+                                ? $notice
+                                : 'Account temporarily locked. Please wait.'
+                        ))
                         : loginEscape($notice) ?>
                 </p>
             <?php endif; ?>

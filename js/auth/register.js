@@ -1,4 +1,4 @@
-
+﻿
 document.addEventListener('DOMContentLoaded', function () {
     const privacyLink = document.getElementById('privacy-notice-link');
     const privacyDialog = document.getElementById('privacy-notice-dialog');
@@ -941,6 +941,261 @@ console.log('REGISTER JS: DOMContentLoaded started');
         checkConfirmPassword();
     });
 
+    // Multi-step registration navigation.
+    function initializeRegistrationSteps() {
+        const sections = Array.from(
+            registerForm.querySelectorAll(':scope > .form-section')
+        );
+        const registerButton = registerForm.querySelector('.register-submit');
+        const loginText = registerForm.querySelector('.register-login');
+
+        if (sections.length !== 6 || !registerButton) {
+            console.error('Registration steps could not be initialized.');
+            return;
+        }
+
+        let currentStep = 0;
+        registerForm.noValidate = true;
+        registerForm.classList.add('register-multistep');
+
+        const progress = document.createElement('div');
+        progress.className = 'register-step-progress';
+        progress.innerHTML = `
+            <div class="register-step-progress__heading">
+                <span id="register-step-title"></span>
+                <span id="register-step-count"></span>
+            </div>
+            <div class="register-step-progress__track">
+                <div class="register-step-progress__fill"></div>
+            </div>
+        `;
+
+        sections[0].before(progress);
+
+        const navigation = document.createElement('div');
+        navigation.className = 'register-step-navigation';
+
+        const previousButton = document.createElement('button');
+        previousButton.type = 'button';
+        previousButton.className = 'register-step-previous';
+        previousButton.textContent = 'Previous';
+
+        const nextButton = document.createElement('button');
+        nextButton.type = 'button';
+        nextButton.className = 'register-step-next';
+        nextButton.textContent = 'Next';
+
+        navigation.append(previousButton, nextButton);
+        registerButton.before(navigation);
+
+        const stepTitle = progress.querySelector('#register-step-title');
+        const stepCount = progress.querySelector('#register-step-count');
+        const progressFill = progress.querySelector(
+            '.register-step-progress__fill'
+        );
+
+        function displayStep(index) {
+            currentStep = index;
+
+            sections.forEach((section, sectionIndex) => {
+                const isActive = sectionIndex === currentStep;
+                section.classList.toggle('is-active', isActive);
+                section.setAttribute('aria-hidden', String(!isActive));
+                section.inert = !isActive;
+            });
+
+            const heading = sections[currentStep].querySelector('h2');
+            stepTitle.textContent = heading
+                ? heading.textContent.trim()
+                : 'Registration';
+
+            stepCount.textContent = `Step ${currentStep + 1} of ${sections.length}`;
+            progressFill.style.width =
+                `${((currentStep + 1) / sections.length) * 100}%`;
+
+            previousButton.hidden = currentStep === 0;
+            nextButton.hidden = currentStep === sections.length - 1;
+            registerButton.hidden = currentStep !== sections.length - 1;
+
+            if (loginText) {
+                loginText.hidden = false;
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function runStepChecks(index) {
+            switch (index) {
+                case 0:
+                    checkIDNumber();
+                    checkEmail();
+                    checkPasswordStrength();
+                    checkConfirmPassword();
+                    usernameInput.dataset.touched = 'true';
+                    return true;
+
+                case 1:
+                    checkFirstName();
+                    checkMiddleName();
+                    checkLastName();
+                    checkNameExtension();
+                    checkBirthDate();
+                    checkSex();
+                    return true;
+
+                case 2:
+                    checkContactNumber();
+                    checkPurokStreet();
+                    checkBarangay();
+                    checkMunicipalityCity();
+                    checkProvince();
+                    checkCountry();
+                    checkZipCode();
+                    checkCivilStatus();
+                    checkNationalID();
+                    return true;
+
+                case 3:
+                    return (
+                        checkSecurityQuestionSelections() &&
+                        checkSecurityQ1() &&
+                        checkSecurityQ4() &&
+                        checkSecurityQ6()
+                    );
+
+                case 4:
+                    return checkPrivacyConsent();
+
+                case 5:
+                    return checkCaptchaField();
+            }
+
+            return true;
+        }
+
+        async function waitForUsernameCheck() {
+            usernameInput.dataset.touched = 'true';
+            await checkUsername();
+
+            const startedAt = Date.now();
+
+            while (Date.now() - startedAt < 8000) {
+                const feedbackClass = usernameFeedback.className;
+
+                if (feedbackClass.includes('field-error')) {
+                    return false;
+                }
+
+                if (
+                    feedbackClass.includes('field-success') &&
+                    usernameFeedback.textContent.trim() === 'Username is available.'
+                ) {
+                    return true;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            usernameFeedback.textContent =
+                'Username check timed out. Please try again.';
+            usernameFeedback.className = 'field-error';
+            return false;
+        }
+
+        async function validateCurrentStep() {
+            const section = sections[currentStep];
+            const controls = Array.from(
+                section.querySelectorAll('input, select, textarea')
+            );
+
+            controls.forEach(control => {
+                control.dataset.touched = 'true';
+            });
+
+            const customChecksPassed = runStepChecks(currentStep);
+
+            if (!customChecksPassed) {
+                const firstControl = controls.find(control =>
+                    !control.disabled && !control.type?.includes('hidden')
+                );
+
+                if (firstControl) {
+                    firstControl.focus();
+                }
+
+                return false;
+            }
+
+            if (currentStep === 0) {
+                const usernameAvailable = await waitForUsernameCheck();
+
+                if (!usernameAvailable) {
+                    usernameInput.focus();
+                    return false;
+                }
+            }
+
+            const invalidControl = controls.find(control =>
+                !control.disabled && !control.checkValidity()
+            );
+
+            if (invalidControl) {
+                invalidControl.focus();
+                invalidControl.reportValidity();
+                return false;
+            }
+
+            const feedbackError = Array.from(
+                section.querySelectorAll('[id$="-feedback"], #captcha-error')
+            ).find(feedback =>
+                feedback.textContent.trim() !== '' &&
+                !feedback.classList.contains('field-success')
+            );
+
+            if (feedbackError) {
+                const relatedFieldId = feedbackError.id.replace(/-feedback$/, '');
+                const relatedField = section.querySelector(
+                    `#${CSS.escape(relatedFieldId)}`
+                );
+
+                if (relatedField) {
+                    relatedField.focus();
+                } else if (controls[0]) {
+                    controls[0].focus();
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        nextButton.addEventListener('click', async function () {
+            nextButton.disabled = true;
+            nextButton.textContent = 'Checking...';
+
+            try {
+                const isValid = await validateCurrentStep();
+
+                if (isValid && currentStep < sections.length - 1) {
+                    displayStep(currentStep + 1);
+                }
+            } finally {
+                nextButton.disabled = false;
+                nextButton.textContent = 'Next';
+            }
+        });
+
+        previousButton.addEventListener('click', function () {
+            if (currentStep > 0) {
+                displayStep(currentStep - 1);
+            }
+        });
+
+        displayStep(0);
+    }
+
+    initializeRegistrationSteps();
     registerForm.addEventListener('submit', function (event) {
         // Validate CAPTCHA before running the other registration checks.
         const captchaInput = document.getElementById('captcha_answer');
@@ -1371,4 +1626,5 @@ console.log('REGISTER JS: DOMContentLoaded started');
     }
 
 });
+
 
