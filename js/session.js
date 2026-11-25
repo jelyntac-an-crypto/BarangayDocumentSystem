@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const WARNING_TIME = 4 * 60 * 1000;
-    const LOGOUT_TIME = 5 * 60 * 1000;
-    const ACTIVITY_INTERVAL = 30 * 1000;
+    const WARNING_TIME = 5 * 1000;
+    const LOGOUT_TIME = 10 * 1000;
+    const ACTIVITY_INTERVAL = 2 * 1000;
 
     let warningTimer;
     let logoutTimer;
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     warningBox.innerHTML = `
         <strong>Session Expiring Soon</strong>
         <p>Your session will expire due to inactivity.</p>
-        <p id="session-countdown">Logging out in 60 seconds.</p>
+        <p id="session-countdown">Logging out in 10 seconds.</p>
         <button type="button" id="continue-session" class="session-warning__button">
             Continue Session
         </button>
@@ -77,11 +77,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Show the one-minute warning.
+    // Show the five-second warning.
     function showWarning() {
         warningBox.classList.add('is-visible');
 
-        let remainingSeconds = 60;
+        let remainingSeconds = 5;
 
         countdownText.textContent =
             'Logging out in ' + remainingSeconds + ' seconds.';
@@ -98,10 +98,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 1000);
     }
 
-    // Redirect after five minutes of inactivity.
-    function logoutUser() {
-        window.location.replace(loginUrl.href);
-    }
+    // Redirect after ten seconds of inactivity.
+    async function logoutUser() {
+          clearTimeout(warningTimer);
+          clearTimeout(logoutTimer);
+          clearInterval(countdownTimer);
+
+          warningBox.classList.remove('is-visible');
+          warningBox.remove();
+
+          try {
+            await fetch(logoutForm.action, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    csrf_token: csrfToken
+                })
+            });
+          } catch (error) {
+            console.error('Automatic logout request failed.');
+          }
+
+           window.location.replace(loginUrl.href);
+        }
 
     // Reset the inactivity timers.
     function resetTimers() {

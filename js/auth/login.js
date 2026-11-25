@@ -38,6 +38,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateCountdown() {
         if (remaining <= 0) {
+            const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+            if (forgotPasswordLink) {
+                forgotPasswordLink.hidden = true;
+            }
+
             clearInterval(countdownInterval);
 
             loginButton.disabled = false;

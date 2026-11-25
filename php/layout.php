@@ -92,6 +92,7 @@ function renderSiteHeader(
     ?>
     <link rel="stylesheet" href="<?= $p('css/header.css') ?>">
     <link rel="stylesheet" href="<?= $p('css/session.css') ?>">
+    <link rel="stylesheet" href="<?= $p('css/sage-green-theme.css') ?>">
 
     <header class="sh">
         <div class="sh__bar">
@@ -190,8 +191,10 @@ function renderSiteHeader(
         </div>
     </header>
     <?php
-    // Load the session idle timeout script.
-    echo '<script src="' . e($rootPrefix . 'js/session.js') . '" defer></script>';
+    // Load the session idle timeout script only for authenticated users.
+    if ($isLoggedIn) {
+        echo '<script src="' . e($rootPrefix . 'js/session.js') . '" defer></script>';
+    }
 }
 
 function renderSiteFooter(): void
@@ -201,3 +204,4 @@ function renderSiteFooter(): void
         ' Barangay Document Request and Tracking System. All rights reserved.</p>';
     echo '</footer>';
 }
+

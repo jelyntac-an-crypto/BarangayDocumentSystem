@@ -37,11 +37,17 @@ $activeLockoutType = $ipBlockRemaining > 0
 $activeLockoutRemaining = $ipBlockRemaining > 0
     ? $ipBlockRemaining
     : $lockoutRemaining;
-$showForgotPassword = !empty($_SESSION['show_forgot_password']);
-
 if ($lockoutRemaining <= 0) {
-    unset($_SESSION['login_lockout_until']);
+    unset(
+        $_SESSION['login_lockout_until'],
+        $_SESSION['show_forgot_password']
+    );
 }
+
+$showForgotPassword =
+    !empty($_SESSION['show_forgot_password'])
+    && $activeLockoutType === 'account'
+    && $activeLockoutRemaining > 0;
 
 unset($_SESSION['login_errors'], $_SESSION['login_notice'], $_SESSION['password_reset_message']);
 

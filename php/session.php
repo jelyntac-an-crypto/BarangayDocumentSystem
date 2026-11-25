@@ -13,8 +13,8 @@ ini_set('session.cookie_httponly', '1');
 ini_set('session.cookie_secure', '0');
 ini_set('session.cookie_samesite', 'Strict');
 
-// Five-minute idle timeout for authenticated users only.
-const SESSION_IDLE_TIMEOUT = 300;
+// Ten-second idle timeout for authenticated users only.
+const SESSION_IDLE_TIMEOUT = 10;
 
 // Configure cookie parameters before starting the session.
 session_set_cookie_params([

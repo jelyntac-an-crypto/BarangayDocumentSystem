@@ -1,0 +1,224 @@
+﻿/* =========================================================
+   BARANGAY DOCUMENT SYSTEM - SAGE GREEN THEME
+   Colors only. Preserve layout, functionality and validation.
+   ========================================================= */
+
+:root {
+    --theme-forest: #315C49;
+    --theme-sage: #A8BFA8;
+    --theme-cream: #F5F0E5;
+    --theme-blue: #D6E5EF;
+    --theme-text: #243B2E;
+    --theme-border: #D8E1D7;
+}
+
+/* Shared page backgrounds */
+body.home,
+body.auth-page,
+body.register-page,
+body.admin-dashboard-body,
+body.resident-page,
+body.my-requests-body,
+body.new-request-body,
+body.notifications-page,
+body.view-request-body,
+body.staff-dashboard-body,
+body.staff-requests-body,
+body.staff-review-body {
+    background-color: var(--theme-cream);
+}
+
+/* Shared header */
+.sh {
+    --ink: var(--theme-text);
+    --dark: var(--theme-forest);
+    color: var(--theme-text);
+    background: rgba(245, 240, 229, .94);
+    border-color: var(--theme-border);
+}
+
+.sh__brand,
+.sh__links a,
+.sh__account a {
+    color: var(--theme-forest);
+}
+
+.sh__links a:hover,
+.sh__account a:hover {
+    color: #527B62;
+}
+
+.sh__links a[aria-current="page"],
+.sh__links a.active {
+    color: #fff;
+    background: var(--theme-forest);
+}
+
+.sh__burger {
+    color: var(--theme-forest);
+}
+
+.sh__bar,
+.sh__notification-panel {
+    border-color: var(--theme-border);
+}
+
+.sh__notification-panel {
+    background: var(--theme-cream);
+    color: var(--theme-text);
+}
+
+/* Homepage */
+body.home {
+    --ink: var(--theme-text);
+    --muted: #617466;
+    --dark: var(--theme-forest);
+    --accent: var(--theme-forest);
+    --sand: var(--theme-sage);
+    background: linear-gradient(160deg, #F5F0E5, #DCE8DC);
+    color: var(--theme-text);
+}
+
+body.home .site-footer {
+    background: var(--theme-forest);
+    color: var(--theme-cream);
+}
+
+/* Login and OTP */
+body.auth-page {
+    --ink: var(--theme-cream);
+    --dark: var(--theme-forest);
+    --sand: var(--theme-sage);
+    background: linear-gradient(160deg, #E6EEE5, #DCE8DC);
+}
+
+body.auth-page .login-container {
+    background:
+        linear-gradient(rgba(49, 92, 73, .25), rgba(49, 92, 73, .25)),
+        url("../images/barangay-hall.jpg") center / cover no-repeat;
+}
+
+body.auth-page .login-card {
+    background: rgba(36, 67, 52, .88);
+    border-color: rgba(220, 235, 220, .45);
+}
+
+body.auth-page .login-subtitle {
+    background: rgba(49, 92, 73, .55);
+    border-color: rgba(220, 235, 220, .4);
+}
+
+body.auth-page .login-button,
+body.auth-page .login-card button[type="submit"] {
+    background: var(--theme-sage);
+    color: var(--theme-text);
+}
+
+body.auth-page .login-button:hover,
+body.auth-page .login-card button[type="submit"]:hover:not(:disabled) {
+    background: #C4D5C2;
+}
+
+body.auth-page .login-links a {
+    color: #C8DEC9;
+}
+
+/* Registration */
+body.register-page {
+    --ink: var(--theme-text);
+    --muted: #D4E1D5;
+    --paper: var(--theme-cream);
+    --surface: rgba(245, 240, 229, .10);
+    --teal: var(--theme-forest);
+    --teal-dark: #244535;
+    --sun: var(--theme-sage);
+    --line: var(--theme-border);
+    background: linear-gradient(160deg, #E6EEE5, #DCE8DC);
+}
+
+body.register-page::before {
+    background:
+        linear-gradient(rgba(49, 92, 73, .28), rgba(49, 92, 73, .28)),
+        url("../images/barangay-hall.jpg") center / cover no-repeat fixed;
+}
+
+body.register-page .register-container form {
+    background: rgba(36, 67, 52, .88);
+    border-color: rgba(220, 235, 220, .45);
+}
+
+body.register-page .form-section {
+    background: rgba(245, 240, 229, .09);
+    border-color: rgba(220, 235, 220, .30);
+}
+
+body.register-page .register-submit {
+    background: var(--theme-sage);
+    color: var(--theme-text);
+}
+
+body.register-page .register-submit:hover {
+    background: #C4D5C2;
+}
+
+body.register-page .form-section a,
+body.register-page .register-login a {
+    color: #C8DEC9;
+}
+
+/* Dashboard page backgrounds */
+body.admin-dashboard-body,
+body.resident-page,
+body.my-requests-body,
+body.new-request-body,
+body.notifications-page,
+body.view-request-body,
+body.staff-dashboard-body,
+body.staff-requests-body,
+body.staff-review-body {
+    background: linear-gradient(160deg, #F5F0E5, #E3EBE1);
+    color: var(--theme-text);
+}
+
+/* Common dashboard surfaces */
+body.admin-dashboard-body .dashboard-card,
+body.resident-page .dashboard-card,
+body.staff-dashboard-body .dashboard-card,
+body.admin-dashboard-body .card,
+body.resident-page .card,
+body.staff-dashboard-body .card {
+    border-color: var(--theme-border);
+}
+
+/* Common primary action buttons */
+body.admin-dashboard-body button,
+body.resident-page button,
+body.my-requests-body button,
+body.new-request-body button,
+body.view-request-body button,
+body.staff-dashboard-body button,
+body.staff-requests-body button,
+body.staff-review-body button {
+    accent-color: var(--theme-forest);
+}
+
+/* Footer */
+.site-footer {
+    border-color: var(--theme-border);
+}
+
+/* Keep all semantic status colors, alerts, validation messages,
+   and error/success/warning styles controlled by their original CSS. */
+
+/* Keep header LOGIN text clearly visible */
+.sh__btn--dark {
+    background: #315C49;
+    color: #FFFFFF;
+}
+.sh__btn--dark > span:first-child {
+    color: #FFFFFF;
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
+}
+

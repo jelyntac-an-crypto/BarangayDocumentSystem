@@ -252,7 +252,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      */
                     unset(
                         $_SESSION['verified_password_reset_user_id'],
-                        $_SESSION['verified_password_reset_created_at']
+                        $_SESSION['verified_password_reset_created_at'],
+                        $_SESSION['show_forgot_password'],
+                        $_SESSION['login_lockout_until']
                     );
 
                     session_regenerate_id(true);
